@@ -54,15 +54,16 @@ Window {
                 Layout.fillHeight: true
                 Layout.preferredHeight: 1920 - 218 - 215
 
-                visible: false
+                visible: true
             }
 
             Home {
                 id: appLauncherAreaLauncher
+                objectName: "Home"
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.preferredHeight: 1920 - 218 - 215
-                visible: true
+                visible: false
             }
 
             MediaArea {

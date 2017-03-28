@@ -14,7 +14,7 @@
 
 TEMPLATE = app
 TARGET = HomeScreen
-QT = qml quick dbus
+QT = qml quick widgets dbus websockets
 CONFIG += c++11
 
 include(../interfaces/interfaces.pri)
@@ -23,6 +23,7 @@ SOURCES += \
     src/main.cpp \
     src/homescreencontrolinterface.cpp \
     src/layouthandler.cpp \
+    src/usermanagement.cpp \
     src/applicationmodel.cpp \
     src/appinfo.cpp \
     src/statusbarmodel.cpp \
@@ -32,6 +33,7 @@ SOURCES += \
 HEADERS  += \
     src/homescreencontrolinterface.h \
     src/layouthandler.h \
+    src/usermanagement.h \
     src/statusbarmodel.h \
     src/statusbarserver.h \
     src/applicationlauncher.h \

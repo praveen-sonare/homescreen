@@ -16,10 +16,17 @@
  */
 
 import QtQuick 2.2
+import QtQuick.Layouts 1.1
+import QtQuick.Controls 1.0
+import QtQuick.Controls 1.4
+import QtQuick.Controls.Styles 1.4
 import Home 1.0
 
 Item {
     id: root
+    property int pid: -1
+    signal languageChanged
+    signal disconnect
 
     Image {
         anchors.fill: parent
@@ -27,8 +34,176 @@ Item {
         anchors.bottomMargin: -215
         source: './images/AGL_HMI_Background_Car-01.png'
     }
+    Image {
+        id: sign90
+        width: 200
+        height: 200
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: 20
+        source: './images/B14-90.png'
+        visible: false
+    }
+    Image {
+        id: flagLanguage
+        scale: 0.7
+        anchors.left: parent.left
+        anchors.leftMargin: 20
+        anchors.top: parent.top
+        anchors.topMargin: 10
+        source: './images/us_flag.png'
+        visible: true
+    }
+    Image {
+        id: visa
+        sourceSize.width: 170
+        anchors.right: parent.right
+        anchors.rightMargin: 20
+        anchors.top: parent.top
+        anchors.topMargin: 20
+        source: './images/visa.png'
+        visible: false
+        MouseArea {
+            anchors.fill: parent
+            onPressed: {
+                n1.target = visa
+                n1.start()
+            }
+            onReleased: {
+                n2.target = visa
+                n2.start()
+            }
+        }
+        Label {
+            id: cardNumber
+            anchors.top: parent.bottom
+            anchors.topMargin: 10
+            anchors.horizontalCenter: parent.horizontalCenter
+            horizontalAlignment:  Text.AlignHCenter
+            color: "white"
+            text: "111"
+            font.pixelSize: 20
+            font.family: "Roboto"
+        }
+    }
+    Image {
+        id: licence
+        sourceSize.width: 170
+        anchors.right: visa.right
+        anchors.top: visa.bottom
+        anchors.topMargin: 50
+        visible: false
+        MouseArea {
+            anchors.fill: parent
+            onPressed: {
+                n1.target = licence
+                n1.start()
+            }
+            onReleased: {
+                n2.target = licence
+                n2.start()
+            }
+        }
 
-    property int pid: -1
+    }
+    NumberAnimation {
+        id: n1
+        property: "sourceSize.width"
+        duration: 800
+        to: parent.width * .8
+        easing.type: Easing.InOutQuad
+        onStarted: target.z = 100
+    }
+    NumberAnimation {
+        id: n2
+        property: "sourceSize.width"
+        duration: 300
+        to: 170
+        easing.type: Easing.InOutQuad
+        onStopped: target.z = 0
+    }
+    Item {
+        id: hello
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 40
+        visible: true
+        Text {
+            id: helloText
+            anchors.centerIn: parent
+            color: 'white'
+            text: 'No Authenticated User'
+            font.pixelSize: 40
+            font.family: 'Roboto'
+            SequentialAnimation on font.letterSpacing {
+                id: animation1
+                loops: 1;
+                NumberAnimation { from: 0; to: 50; easing.type: Easing.InQuad; duration: 3000 }
+                running: false
+                onRunningChanged: {
+                    if(running) {
+                        hello.visible = true
+                    } else {
+                        helloText.opacity = 1
+                        helloText.font.letterSpacing = 0
+                    }
+                }
+            }
+
+            SequentialAnimation on opacity {
+                id: animation2
+                loops: 1;
+                running: false
+                NumberAnimation { from: 1; to: 0; duration: 2600 }
+                PauseAnimation { duration: 400 }
+            }
+        }
+    }
+    function showHello(helloString) {
+        helloText.text = helloString
+        animation1.running = true;
+        animation2.running = true;
+    }
+
+    function showSign90(show, lang) {
+        sign90.visible = show
+        if(show) {
+            if(lang === 'fr')
+                sign90.source = './images/B14-90.png'
+            else
+                sign90.source = './images/B14-60.png'
+        }
+    }
+
+    function showVisa(show, num) {
+        visa.visible = show
+        cardNumber.text = num
+    }
+    function showLicence(show, licenceImage) {
+        if(show) {
+            licence.source = licenceImage
+            licence.visible = true
+        } else {
+            licence.visible = false
+        }
+    }
+
+    function changeFlag(flagImage) {
+        flagLanguage.source = flagImage
+    }
+    function setUser(type, auts) {
+        if(type === '') {
+            authorisations.visible = false
+        } else {
+            authorisations.visible = true
+            labelUserType.text = type
+            myModel.clear()
+            for (var i=0; i<auts.length; i++) {
+                if(auts[i] !== '')
+                    myModel.append({"name": auts[i]})
+            }
+        }
+    }
 
     GridView {
         anchors.centerIn: parent
@@ -43,8 +218,26 @@ Item {
             width: 320
             height: 320
             Image {
+                id: appImage
                 anchors.fill: parent
                 source: './images/HMI_AppLauncher_%1_%2-01.png'.arg(model.icon).arg(pressed ? 'Active' : 'Inactive')
+                Label {
+                    id: labelName
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    y: 257
+                    font.pixelSize: 32
+                    font.family: "Roboto"
+                    color: "white"
+                    text: '%1'.arg(model.name)
+                    function myChangeLanguage() {
+                        text = '%1'.arg(model.name)
+                        appImage.source = './images/HMI_AppLauncher_%1_%2-01.png'.arg(model.icon).arg(pressed ? 'Active' : 'Inactive')
+                    }
+                    Component.onCompleted: {
+                        root.languageChanged.connect(myChangeLanguage)
+                    }
+                }
             }
             onClicked: {
                 console.log("app is ", model.id)
@@ -54,12 +247,89 @@ Item {
 
                     applicationArea.visible = true
                     appLauncherAreaLauncher.visible = false
-                    layoutHandler.showAppLayer(pid)
+                    layoutHandler.showAppLayer(model.id, pid)
                 }
                 else {
                     console.warn("app cannot be launched!")
                 }
             }
+        }
+    }
+    ListModel {
+        id: myModel
+        ListElement {
+            name: 'Install App'
+        }
+        ListElement {
+            name: 'Open Trunk'
+        }
+        ListElement {
+            name: 'Update Software'
+        }
+        ListElement {
+            name: 'View Online'
+        }
+    }
+    Item {
+        id: authorisations
+        anchors.fill: parent
+        visible: false
+        GridLayout {
+            id: gridAut
+            columns: 2
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.bottomMargin: 50
+            anchors.leftMargin: 20
+            Repeater {
+                model: myModel
+                Image {
+                    source: './images/' + model.name + '.png'
+                    width: sourceSize.width
+                    height: sourceSize.height
+                    visible: true
+                }
+            }
+        }
+        Label {
+            id: labelUserType
+            anchors.bottom: gridAut.top
+            anchors.bottomMargin: 10
+            anchors.left: gridAut.left
+            color: "white"
+            text: "Owner"
+            font.pixelSize: 30
+            font.family: "Roboto"
+        }
+    }
+
+    Image {
+        id: logout
+        width: sourceSize.width
+        height: sourceSize.height
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        anchors.bottomMargin: 10
+        anchors.rightMargin: 20
+        source: './images/Logout-01.png'
+        visible: true
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                rotateLogout.start()
+                disconnect()
+                helloText.text= 'No Authenticated User'
+
+            }
+        }
+        RotationAnimator {
+            id: rotateLogout
+            target: logout;
+            from: 0;
+            to: 360;
+            loops: 1
+            duration: 500
+            running: false
         }
     }
 }

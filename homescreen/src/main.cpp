@@ -26,6 +26,7 @@
 #include "applicationlauncher.h"
 #include "statusbarmodel.h"
 #include "applicationmodel.h"
+#include "usermanagement.h"
 #include "appinfo.h"
 #include "afm_user_daemon_proxy.h"
 
@@ -98,6 +99,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("layoutHandler", layoutHandler);
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-
+    UserManagement userManagement(engine.rootObjects().first());
+    Q_UNUSED(userManagement);
     return a.exec();
 }
