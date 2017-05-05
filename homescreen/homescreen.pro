@@ -19,6 +19,9 @@ CONFIG += c++11
 
 include(../interfaces/interfaces.pri)
 
+AFM_ICON_DIR = '$$system(pkg-config --variable=icondir afm-main || echo /var/local/lib/afm/icons/)'
+QMAKE_CXXFLAGS += -DAFM_ICON_DIR='\\\"$$AFM_ICON_DIR\\\"'
+
 SOURCES += \
     src/main.cpp \
     src/homescreencontrolinterface.cpp \

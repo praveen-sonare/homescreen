@@ -36,8 +36,23 @@ public:
 };
 
 namespace {
+    QString find_icon_file(QString s)
+    {
+        auto f = QFileInfo(QString(AFM_ICON_DIR), s);
+        if (f.exists()) {
+            return f.absoluteFilePath();
+        }
+        return QString();
+    }
+
     QString get_icon_name(QJsonObject const &i)
     {
+        QString icon_file_name = find_icon_file(i["id"].toString());
+
+        if (! icon_file_name.isEmpty()) {
+            return QStringLiteral("file:") + icon_file_name;
+        }
+
         QString icon = i["id"].toString().split("@").front();
         if (icon == "hvac" || icon == "poi") {
             icon = icon.toUpper();
@@ -46,6 +61,7 @@ namespace {
         } else {
             icon[0] = icon[0].toUpper();
         }
+
         return icon;
     }
 }
@@ -55,7 +71,7 @@ ApplicationModel::Private::Private()
     QString apps = afm_user_daemon_proxy->runnables(QStringLiteral(""));
     QJsonDocument japps = QJsonDocument::fromJson(apps.toUtf8());
     for (auto const &app : japps.array()) {
-        QJsonObject const &jso = app.toObject();
+        auto const &jso = app.toObject();
         auto const name = jso["name"].toString();
         auto const id = jso["id"].toString();
         auto const icon = get_icon_name(jso);

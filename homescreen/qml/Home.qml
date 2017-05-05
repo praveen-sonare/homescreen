@@ -32,20 +32,70 @@ Item {
 
     GridView {
         anchors.centerIn: parent
-        width: cellHeight * 3
-        height: cellHeight * 3
+        width: cellWidth * 3
+        height: parent.height
         cellWidth: 320
         cellHeight: 320
-        interactive: false
+        interactive: true
+        clip: true
 
         model: ApplicationModel {}
+
         delegate: MouseArea {
             width: 320
             height: 320
-            Image {
+
+            Item {
+                width: parent.width
+                height: parent.height
                 anchors.fill: parent
-                source: './images/HMI_AppLauncher_%1_%2-01.png'.arg(model.icon).arg(pressed ? 'Active' : 'Inactive')
+
+                // These images contain the item text at the bottom,
+                // is it possible to crop the image in QML?
+                Image {
+                    id: img
+                    clip: true
+                    width: parent.width
+                    height: parent.height
+                    fillMode: Image.PreserveAspectCrop
+                    source: model.icon.substr(0, 5) === "file:"
+                        ? model.icon
+                        : './images/HMI_AppLauncher_%1_%2-01.png'.arg(model.icon).arg(pressed ? 'Active' : 'Inactive')
+                }
+
+                // Show this rect and the text below if the image could not be loaded
+                Rectangle {
+                    anchors {
+                        fill: parent
+                        margins: 50
+                    }
+                    border {
+                        color: "#64fdcb"
+                        width: 3
+                    }
+                    color: pressed ? "#11bcb9" : "#202020"
+                    radius: parent.width / 2 // circle'd rectangle...
+                    visible: img.status == Image.Error
+                }
+
+                Text {
+                    property int font_size: 26
+
+                    font.family: roboto
+                    font.capitalization: Font.AllUppercase
+                    font.bold: false
+                    font.pixelSize: font_size
+                    text: model.name
+                    color: "#ffffff"
+                    anchors {
+                        horizontalCenter: parent.horizontalCenter
+                        top: img.top
+                        topMargin: parent.height / 2 - font_size / 2
+                    }
+                    visible: img.status == Image.Error
+                }
             }
+
             onClicked: {
                 console.log("app is ", model.id)
                 pid = launcher.launch(model.id)
