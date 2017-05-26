@@ -57,24 +57,8 @@ Item {
                 name: model.name
                 active: model.application === launcher.current
                 onClicked: {
-                    if (0 === model.index) {
-                        appLauncherAreaLauncher.visible = true
-                        applicationArea.visible = false
-                        layoutHandler.hideAppLayer()
-                        launcher.current = ''
-                    }
-                    else {
-                        pid = launcher.launch(model.application)
-                        if (1 < pid) {
-                            applicationArea.visible = true
-                            appLauncherAreaLauncher.visible = false
-                            layoutHandler.makeMeVisible(pid)
-                            layoutHandler.showAppLayer(pid)
-                        }
-                        else {
-                            console.warn("app cannot be launched!")
-                        }
-                    }
+                    if (model.index < 3) // disable navi to launch
+                        launcher.show(model.index === 0 ? '' : model.application)
                 }
             }
         }

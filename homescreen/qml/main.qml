@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2016 The Qt Company Ltd.
- * Copyright (C) 2016, 2017 Mentor Graphics Development (Deutschland) GmbH
+ * Copyright (C) 2017 The Qt Company Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,62 +14,24 @@
  * limitations under the License.
  */
 
-import QtQuick 2.2
+import QtQuick 2.6
 import QtQuick.Window 2.1
-import QtQuick.Layouts 1.1
-import HomeScreen 1.0
+import QtWayland.Compositor 1.0
 
-Window {
-    visible: true
-    flags: Qt.FramelessWindowHint
-    width: container.width * container.scale
-    height: container.height * container.scale
-    title: 'HomeScreen'
+WaylandCompositor {
+    id: compositor
 
-    ApplicationLauncher {
-        id: launcher
+    WaylandOutput {
+        id: screen
+        compositor: compositor
+        sizeFollowsWindow: true
+        transform: WaylandOutput.Transform90
+        window: SystemUI {
+            id: systemUI
+        }
     }
 
-    Image {
-        id: container
-        anchors.centerIn: parent
-        width: 1080
-        height: 1920
-        scale: 1.0
-        source: './images/AGL_HMI_Background_NoCar-01.png'
-
-        ColumnLayout {
-            anchors.fill: parent
-            spacing: 0
-            TopArea {
-                id: topArea
-                Layout.fillWidth: true
-                Layout.preferredHeight: 218
-            }
-
-            Item {
-                id: applicationArea
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.preferredHeight: 1920 - 218 - 215
-
-                visible: false
-            }
-
-            Home {
-                id: appLauncherAreaLauncher
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.preferredHeight: 1920 - 218 - 215
-                visible: true
-            }
-
-            MediaArea {
-                id: mediaArea
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.preferredHeight: 215
-            }
-        }
+    WlShell {
+        onWlShellSurfaceCreated: systemUI.show(shellSurface)
     }
 }

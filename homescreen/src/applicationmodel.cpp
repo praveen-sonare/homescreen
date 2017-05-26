@@ -54,10 +54,19 @@ ApplicationModel::Private::Private()
 {
     QString apps = afm_user_daemon_proxy->runnables(QStringLiteral(""));
     QJsonDocument japps = QJsonDocument::fromJson(apps.toUtf8());
+    // disable apps which don't work with the compositor right now
+    QStringList notShow = {
+        "navigation@0.1"
+        , "phone@0.1"
+        , "controls@0.1"
+        , "poi@0.1"
+        , "mixer@0.1"
+    };
     for (auto const &app : japps.array()) {
         QJsonObject const &jso = app.toObject();
         auto const name = jso["name"].toString();
         auto const id = jso["id"].toString();
+        if (notShow.contains(id)) continue;
         auto const icon = get_icon_name(jso);
         this->data.append(AppInfo(icon, name, id));
         qDebug() << "name:" << name << "icon:" << icon << "id:" << id;

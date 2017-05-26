@@ -52,7 +52,11 @@ void noOutput(QtMsgType, const QMessageLogContext &, const QString &)
 
 int main(int argc, char *argv[])
 {
-    QGuiApplication a(argc, argv);
+    qputenv("QT_QPA_PLATFORM", "eglfs");
+    qputenv("QT_QPA_EGLFS_INTEGRATION","eglfs_kms");
+    qputenv("QT_QPA_EGLFS_KMS_CONFIG","/home/root/kmsconfig");
+
+    QGuiApplication app(argc, argv);
 
     QScopedPointer<org::AGL::afm::user, Cleanup> afm_user_daemon_proxy(new org::AGL::afm::user("org.AGL.afm.user",
                                                                                                "/org/AGL/afm/user",
@@ -72,7 +76,7 @@ int main(int argc, char *argv[])
     QCommandLineOption quietOption(QStringList() << "q" << "quiet",
         QCoreApplication::translate("main", "Be quiet. No outputs."));
     parser.addOption(quietOption);
-    parser.process(a);
+    parser.process(app);
 
     if (parser.isSet(quietOption))
     {
@@ -118,5 +122,6 @@ int main(int argc, char *argv[])
     // Initalize PA client
     client->init();
 
-    return a.exec();
+    QObject::connect(&engine, &QQmlApplicationEngine::quit, &app, &QGuiApplication::quit);
+    return app.exec();
 }

@@ -54,17 +54,7 @@ Item {
             onPressAndHold: currentId = applicationModel.id(newIndex = index)
             onReleased: {
                 if (currentId === '') {
-                    pid = launcher.launch(applicationModel.id(loc.index))
-                    if (1 < pid) {
-                        layoutHandler.makeMeVisible(pid)
-
-                        applicationArea.visible = true
-                        appLauncherAreaLauncher.visible = false
-                        layoutHandler.showAppLayer(pid)
-                    }
-                    else {
-                        console.warn("app cannot be launched!")
-                    }
+                    launcher.show(applicationModel.id(loc.index))
                 } else {
                     currentId = ''
                 }

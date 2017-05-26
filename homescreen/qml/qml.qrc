@@ -11,5 +11,6 @@
         <file>StatusArea.qml</file>
         <file>TopArea.qml</file>
         <file>IconItem.qml</file>
+        <file>SystemUI.qml</file>
     </qresource>
 </RCC>
