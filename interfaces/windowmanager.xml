@@ -191,6 +191,7 @@
 		  Show layer for application .
 		-->
 		<method name="showAppLayer">
+			<arg name="name" type="s" direction="in"/>
 			<arg name="pid" type="i" direction="in"/>
 		</method>
 		<!--

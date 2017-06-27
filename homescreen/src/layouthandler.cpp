@@ -86,9 +86,9 @@ LayoutHandler::~LayoutHandler()
     delete mp_dBusWindowManagerProxy;
 }
 
-void LayoutHandler::showAppLayer(int pid)
+void LayoutHandler::showAppLayer(const QString &app_id, int pid)
 {
-    mp_dBusWindowManagerProxy->showAppLayer(pid);
+    mp_dBusWindowManagerProxy->showAppLayer(app_id, pid);
 }
 
 void LayoutHandler::hideAppLayer()

@@ -31,7 +31,7 @@ public:
 signals:
 
 public slots:
-    void showAppLayer(int pid);
+    void showAppLayer(const QString &app_id, int pid);
     void hideAppLayer();
     void makeMeVisible(int pid);
 private:
