@@ -28,8 +28,6 @@
 #include "applicationmodel.h"
 #include "appinfo.h"
 #include "afm_user_daemon_proxy.h"
-#include "mastervolume.h"
-#include "paclient.h"
 
 // XXX: We want this DBus connection to be shared across the different
 // QML objects, is there another way to do this, a nice way, perhaps?
@@ -79,26 +77,18 @@ int main(int argc, char *argv[])
         qInstallMessageHandler(noOutput);
     }
 
-    // Fire up PA client QThread
-    QThread* pat = new QThread;
-    PaClient* client = new PaClient();
-    client->moveToThread(pat);
-    pat->start();
-
     qDBusRegisterMetaType<AppInfo>();
     qDBusRegisterMetaType<QList<AppInfo> >();
 
     qmlRegisterType<ApplicationLauncher>("HomeScreen", 1, 0, "ApplicationLauncher");
     qmlRegisterType<ApplicationModel>("Home", 1, 0, "ApplicationModel");
     qmlRegisterType<StatusBarModel>("HomeScreen", 1, 0, "StatusBarModel");
-    qmlRegisterType<MasterVolume>("MasterVolume", 1, 0, "MasterVolume");
 
     QQmlApplicationEngine engine;
 
     LayoutHandler* layoutHandler = new LayoutHandler();
 
     HomeScreenControlInterface* hsci = new HomeScreenControlInterface();
-
     QObject::connect(hsci, SIGNAL(newRequestGetSurfaceStatus(int)), layoutHandler, SLOT(requestGetSurfaceStatus(int)));
     QObject::connect(hsci, SIGNAL(newRequestsToBeVisibleApp(int)), layoutHandler, SLOT(makeMeVisible(int)));
     QObject::connect(hsci, SIGNAL(newRequestRenderSurfaceToArea(int, int)), layoutHandler, SLOT(requestRenderSurfaceToArea(int,int)));
@@ -108,15 +98,6 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("layoutHandler", layoutHandler);
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-
-    QList<QObject *> mobjs = engine.rootObjects();
-    MasterVolume *mv = mobjs.first()->findChild<MasterVolume *>("mv");
-    engine.rootContext()->setContextProperty("MasterVolume", mv);
-    QObject::connect(mv, SIGNAL(sliderVolumeChanged(int)), client, SLOT(incDecVolume(int)));
-    QObject::connect(client, SIGNAL(volumeExternallyChanged(int)), mv, SLOT(changeExternalVolume(int)));
-
-    // Initalize PA client
-    client->init();
 
     return a.exec();
 }
