@@ -10,6 +10,5 @@
         <file>ShortcutIcon.qml</file>
         <file>StatusArea.qml</file>
         <file>TopArea.qml</file>
-        <file>IconItem.qml</file>
     </qresource>
 </RCC>

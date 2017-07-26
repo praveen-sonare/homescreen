@@ -114,31 +114,3 @@ QHash<int, QByteArray> ApplicationModel::roleNames() const
     roles[Qt::UserRole] = "id";
     return roles;
 }
-
-QString ApplicationModel::id(int i) const
-{
-    return data(index(i), Qt::UserRole).toString();
-}
-
-void ApplicationModel::move(int from, int to)
-{
-    QModelIndex parent;
-    if (to < 0 || to > rowCount()) return;
-    if (from < to) {
-        if (!beginMoveRows(parent, from, from, parent, to + 1)) {
-            qDebug() << from << to << false;
-            return;
-        }
-        d->data.move(from, to);
-        endMoveRows();
-    } else if (from > to) {
-        if (!beginMoveRows(parent, from, from, parent, to)) {
-            qDebug() << from << to << false;
-            return;
-        }
-        d->data.move(from, to);
-        endMoveRows();
-    } else {
-        qDebug() << from << to << false;
-    }
-}
