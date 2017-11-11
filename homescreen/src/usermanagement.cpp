@@ -3,6 +3,9 @@
 #include <QDebug>
 #include <QtCore/QJsonDocument>
 #include <QByteArray>
+
+#define APINAME "identity"
+
 UserManagement::UserManagement(QObject *root) : QObject()
 {
     home = root->findChild<QObject *>("Home");
@@ -42,7 +45,7 @@ void UserManagement::slot_disconnect()
     QMetaObject::invokeMethod(home, "changeFlag", Q_ARG(QVariant, "./images/us_flag.png"));
     QMetaObject::invokeMethod(home, "setUser", Q_ARG(QVariant, ""), Q_ARG(QVariant, ""));
     QVariantList list;
-    list << 2 << QString().setNum(++sequence) << "agl-identity-agent/logout" << true;
+    list << 2 << QString().setNum(++sequence) << APINAME"/logout" << true;
     listToJson(list, &data);
     slot_sendData();
 }
@@ -126,11 +129,11 @@ void UserManagement::onConnected()
             this, &UserManagement::onTextMessageReceived);
     QVariantList list;
     QByteArray json;
-    list << 2 << QString().setNum(++sequence) << "agl-identity-agent/subscribe" << true;
+    list << 2 << QString().setNum(++sequence) << APINAME"/subscribe" << true;
     listToJson(list, &json);
     webSocket.sendTextMessage(QString(json));
     list .clear();
-    list << 2 << QString().setNum(++sequence) << "agl-identity-agent/scan" << true;
+    list << 2 << QString().setNum(++sequence) << APINAME"/scan" << true;
     listToJson(list, &json);
     webSocket.sendTextMessage(QString(json));
 }
@@ -152,7 +155,7 @@ void UserManagement::onTextMessageReceived(QString message)
         if(map["eventName"].toString() == "login") {
             //qWarning()<<"login received in client";
             list.clear();
-            list << 2 << QString().setNum(++sequence) << "agl-identity-agent/get" << true;
+            list << 2 << QString().setNum(++sequence) << APINAME"/get" << true;
             listToJson(list, &data);
             QTimer::singleShot(300, this, SLOT(slot_sendData()));
         }
@@ -303,9 +306,9 @@ void UserManagement::processTextMessage(QString message)
     QString reply;
     switch(messType) {
     case 2:
-        if(cmd == "agl-identity-agent/subscribe") {
+        if(cmd == APINAME"/subscribe") {
             reply = "[3,\"999maitai999\",{\"jtype\":\"afb-reply\",\"request\":{\"status\":\"success\",\"uuid\":\"1f2f7678-6f2e-4f54-b7b5-d0d4dcbf2e41\"}}]";
-        } else if (cmd == "agl-identity-agent/get") {
+        } else if (cmd == APINAME"/get") {
             reply = "[3,\"999maitai99\",{\"jtype\":\"afb-reply\",\"request\":{\"status\":\"success\"},\"response\":....}]";
             reply = reply.replace("....", clientDetails);
         } else {
@@ -345,8 +348,8 @@ void UserManagement::slot_timerTest()
         timerTest.stop();
         return;
     }
-    pSocket->sendTextMessage("[5,\"agl-identity-agent/event\",{\"event\":\"agl-identity-agent\/event\",\"data\":{\"eventName\":\"incoming\",\"accountid\":\"D2:D4:71:0D:B5:F1\",\"nickname\":\"D2:D4:71:0D:B5:F1\"},\"jtype\":\"afb-event\"}]");
-    pSocket->sendTextMessage("[5,\"agl-identity-agent/event\",{\"event\":\"agl-identity-agent\/event\",\"data\":{\"eventName\":\"login\",\"accountid\":\"null\"},\"jtype\":\"afb-event\"}]");
+    pSocket->sendTextMessage("[5,\APINAME"/event\",{\"event\":\APINAME"\/event\",\"data\":{\"eventName\":\"incoming\",\"accountid\":\"D2:D4:71:0D:B5:F1\",\"nickname\":\"D2:D4:71:0D:B5:F1\"},\"jtype\":\"afb-event\"}]");
+    pSocket->sendTextMessage("[5,\APINAME"/event\",{\"event\":\APINAME"\/event\",\"data\":{\"eventName\":\"login\",\"accountid\":\"null\"},\"jtype\":\"afb-event\"}]");
 }
 void UserManagement::onServerClosed()
 {
