@@ -1,0 +1,6 @@
+#!/bin/sh
+
+x=`grep X-AFM--http-port= /var/local/lib/systemd/user/*agl-identity*.service | sed s/.*=//`
+export IDENTITY_WEBSOCKET="ws://localhost:$x/api?token=HELLO"
+
+exec /usr/AGL/homescreen/HomeScreen

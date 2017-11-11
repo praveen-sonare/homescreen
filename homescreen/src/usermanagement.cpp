@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "usermanagement.h"
 #include <QDebug>
 #include <QtCore/QJsonDocument>
@@ -100,7 +101,7 @@ void UserManagement::slot_turnOffRed()
 void UserManagement::connectWebsockets()
 {
 #ifdef REAL_SERVER
-    const QUrl url(REAL_SERVER);
+    const QUrl url(getenv("IDENTITY_WEBSOCKET") ?: REAL_SERVER);
 #else
     const QUrl url(QStringLiteral("ws://localhost:1234"));
 #endif
