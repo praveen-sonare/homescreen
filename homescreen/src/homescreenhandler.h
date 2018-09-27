@@ -32,7 +32,7 @@ public:
 
     void init(int port, const char* token);
 
-    Q_INVOKABLE void tapShortcut(QString application_name);
+    Q_INVOKABLE void tapShortcut(QString application_id);
 
     void onRep(struct json_object* reply_contents);
     void onEv(const string& event, struct json_object* event_contents);

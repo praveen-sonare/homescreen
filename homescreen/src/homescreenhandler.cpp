@@ -51,10 +51,10 @@ void HomescreenHandler::init(int port, const char *token)
 
 }
 
-void HomescreenHandler::tapShortcut(QString application_name)
+void HomescreenHandler::tapShortcut(QString application_id)
 {
-    HMI_DEBUG("HomeScreen","tapShortcut %s", application_name.toStdString().c_str());
-    mp_hs->tapShortcut(application_name.toStdString().c_str());
+    HMI_DEBUG("HomeScreen","tapShortcut %s", application_id.toStdString().c_str());
+    mp_hs->tapShortcut(application_id.toStdString().c_str());
 }
 
 void HomescreenHandler::onRep_static(struct json_object* reply_contents)
