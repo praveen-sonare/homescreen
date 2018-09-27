@@ -28,18 +28,22 @@ Item {
     ListModel {
         id: applicationModel
         ListElement {
+            appid: 'launcher'
             name: 'launcher'
             application: 'launcher@0.1'
         }
         ListElement {
+            appid: 'mediaplayer'
             name: 'MediaPlayer'
             application: 'mediaplayer@0.1'
         }
         ListElement {
+            appid: 'hvac'
             name: 'HVAC'
             application: 'hvac@0.1'
         }
         ListElement {
+            appid: 'navigation'
             name: 'Navigation'
             application: 'navigation@0.1'
         }
@@ -66,7 +70,7 @@ Item {
                         console.warn(model.application)
                         console.warn("app cannot be launched!")
                     }
-                    homescreenHandler.tapShortcut(model.name)
+                    homescreenHandler.tapShortcut(model.appid)
                 }
             }
         }
