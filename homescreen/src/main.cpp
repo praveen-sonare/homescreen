@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016, 2017 Mentor Graphics Development (Deutschland) GmbH
- * Copyright (c) 2017, 2018 TOYOTA MOTOR CORPORATION
+ * Copyright (c) 2017 TOYOTA MOTOR CORPORATION
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@
 #include <QtQml/QQmlContext>
 #include <QtQml/qqml.h>
 #include <QQuickWindow>
+#include <QThread>
 
 #include <qlibwindowmanager.h>
 #include <weather.h>
@@ -32,6 +33,7 @@
 #include "mastervolume.h"
 #include "homescreenhandler.h"
 #include "hmi-debug.h"
+#include "toucharea.h"
 
 // XXX: We want this DBus connection to be shared across the different
 // QML objects, is there another way to do this, a nice way, perhaps?
@@ -75,7 +77,7 @@ int main(int argc, char *argv[])
     parser.addVersionOption();
     parser.process(a);
     QStringList positionalArguments = parser.positionalArguments();
-
+    
     int port = 1700;
     QString token = "wm";
 
@@ -93,11 +95,10 @@ int main(int argc, char *argv[])
 
     ApplicationLauncher *launcher = new ApplicationLauncher();
     QLibWindowmanager* layoutHandler = new QLibWindowmanager();
+    HomescreenHandler* homescreenHandler = new HomescreenHandler();
     if(layoutHandler->init(port,token) != 0){
         exit(EXIT_FAILURE);
     }
-
-    AGLScreenInfo screenInfo(layoutHandler->get_scale_factor());
 
     if (layoutHandler->requestSurface(QString("HomeScreen")) != 0) {
         exit(EXIT_FAILURE);
@@ -107,19 +108,18 @@ int main(int argc, char *argv[])
         layoutHandler->endDraw(QString("HomeScreen"));
     });
 
-    layoutHandler->set_event_handler(QLibWindowmanager::Event_ScreenUpdated, [layoutHandler, launcher](json_object *object) {
+    layoutHandler->set_event_handler(QLibWindowmanager::Event_ScreenUpdated, [layoutHandler, launcher, homescreenHandler](json_object *object) {
         json_object *jarray = json_object_object_get(object, "ids");
         int arrLen = json_object_array_length(jarray);
         for( int idx = 0; idx < arrLen; idx++)
         {
             QString label = QString(json_object_get_string(	json_object_array_get_idx(jarray, idx) ));
-            HMI_DEBUG("HomeScreen","Event_ScreenUpdated application: %s.", label.toStdString().c_str());
+            HMI_DEBUG("HomeScreen","Event_ScreenUpdated application11: %s.", label.toStdString().c_str());
+            homescreenHandler->setCurrentApplication(label);
             QMetaObject::invokeMethod(launcher, "setCurrent", Qt::QueuedConnection, Q_ARG(QString, label));
         }
     });
 
-    HomescreenHandler* homescreenHandler = new HomescreenHandler();
-    homescreenHandler->init(port, token.toStdString().c_str());
 
     QUrl bindingAddress;
     bindingAddress.setScheme(QStringLiteral("ws"));
@@ -131,23 +131,35 @@ int main(int argc, char *argv[])
     query.addQueryItem(QStringLiteral("token"), token);
     bindingAddress.setQuery(query);
 
+    TouchArea* touchArea = new TouchArea();
+
     // mail.qml loading
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("layoutHandler", layoutHandler);
     engine.rootContext()->setContextProperty("homescreenHandler", homescreenHandler);
+    engine.rootContext()->setContextProperty("touchArea", touchArea);
     engine.rootContext()->setContextProperty("launcher", launcher);
     engine.rootContext()->setContextProperty("weather", new Weather(bindingAddress));
     engine.rootContext()->setContextProperty("bluetooth", new Bluetooth(bindingAddress));
-    engine.rootContext()->setContextProperty("screenInfo", &screenInfo);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
     QObject *root = engine.rootObjects().first();
     QQuickWindow *window = qobject_cast<QQuickWindow *>(root);
-    QObject::connect(window, SIGNAL(frameSwapped()), layoutHandler, SLOT(slotActivateSurface()));
+
+    touchArea->setWindow(window);
+    QThread* thread = new QThread;
+    touchArea->moveToThread(thread);
+    QObject::connect(thread, &QThread::started, touchArea, &TouchArea::init);
+
+    thread->start();
 
     QList<QObject *> sobjs = engine.rootObjects();
     StatusBarModel *statusBar = sobjs.first()->findChild<StatusBarModel *>("statusBar");
     statusBar->init(bindingAddress, engine.rootContext());
+
+    QObject::connect(window, SIGNAL(frameSwapped()), layoutHandler, SLOT(slotActivateSurface()));
+
+    homescreenHandler->init(port, token.toStdString().c_str());
 
     return a.exec();
 }

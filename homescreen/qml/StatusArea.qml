@@ -1,7 +1,6 @@
 /*
  * Copyright (C) 2016 The Qt Company Ltd.
  * Copyright (C) 2016, 2017 Mentor Graphics Development (Deutschland) GmbH
- * Copyright (c) 2017, 2018 TOYOTA MOTOR CORPORATION
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,38 +116,36 @@ Item {
             Layout.fillHeight: true
             Layout.preferredWidth: 76
             spacing: -10
-
+            Rectangle {
+                Layout.preferredWidth: 77
+                Layout.preferredHeight: 55
+                opacity: 0
+            }
             Image {
                 id: bt_icon
                 Layout.preferredWidth: 77
-                Layout.preferredHeight: 73
+                Layout.preferredHeight: 55
                 source: connStatus ? './images/Status/HMI_Status_Bluetooth_On-01.png' : './images/Status/HMI_Status_Bluetooth_Inactive-01.png'
                 fillMode: Image.PreserveAspectFit
                 property string deviceName: "none"
                 property bool connStatus: false
                 Connections {
                     target: bluetooth
-
-                    //{"event":"Bluetooth-Manager\/connection","data":{"Status":"connected","Address":"88:BD:45:EC:3A:E6"},"jtype":"afb-event"}
-                    //{"event":"Bluetooth-Manager\/connection","data":{"Status":"disconnected","Address":"88:BD:45:EC:3A:E6"},"jtype":"afb-event"}
                     onConnectionEvent: {
-                        // console.log("bluetooth connection is:", data.Status)
-                        // console.log("onConnectionEvent bt_icon.deviceName:",bt_icon.deviceName, "bt_icon.connStatus:", bt_icon.connStatus)
-                        if (data.Status == "connected"){
+                        console.log("onConnectionEvent", data.Status)
+                        if (data.Status === "connected") {
                             bt_icon.connStatus = true
-                        } else if (data.Status == "disconnected"){
+                        } else if (data.Status === "disconnected") {
                             bt_icon.connStatus = false
                         }
                     }
-                    //{"event":"Bluetooth-Manager\/device_updated","data":{"Address":"88:BD:45:EC:3A:E6","Name":"SG02","Paired":"True","Connected":"True","AVPConnected":"True","Metadata":{"Title":"","Artist":"","Status":"stop}
-                    onDeviceUpdatedEvent: {
-                        // console.log("bluetooth onDeviceUpdatedEvent date is:", data.Name, "Paired: ", data.Paired, "Connected: ", data.Connected)
-                        // console.log("onDeviceUpdatedEvent bt_icon.deviceName:",bt_icon.deviceName, "bt_icon.connStatus:", bt_icon.connStatus)
-                        if ( data.Paired == "True" &&  data.Connected == "True" ){
-                            bt_icon.deviceName = data.Name
+                    onDeviceUpdateEvent: {
+                        console.log("onConnectionEvent", data.Paired)
+                        if (data.Paired === "True" && data.Connected === "True") {
+                            bt_icon.deviceName = data.name
                             bt_icon.connStatus = true
                         } else {
-                            if(bt_icon.deviceName == data.Name)
+                            if(bt_icon.deviceName === data.Name)
                             {
                                 bt_icon.connStatus = false
                             }
@@ -156,11 +153,12 @@ Item {
                     }
                 }
             }
+
             Repeater {
                 model: StatusBarModel { objectName: "statusBar" }
                 delegate: Image {
                     Layout.preferredWidth: 77
-                    Layout.preferredHeight: 73
+                    Layout.preferredHeight: 55
                     source: model.modelData
                     fillMode: Image.PreserveAspectFit
                 }

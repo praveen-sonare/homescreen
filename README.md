@@ -15,14 +15,14 @@ $ git clone git clone https://gerrit.automotivelinux.org/gerrit/staging/meta-hmi
 
 Then you can get the following recipe.
 
-* `meta-agl-demo/recipes-demo-hmi/homescreen`
+* `meta-hmi-framework/homescreen-2017`
 
 
 **Bitbake**
 
 ```
 $ source meta-agl/scripts/aglsetup.sh -m m3ulcb agl-demo agl-devel agl-appfw-smack agl-hmi-framework
-$ bitbake homescreen
+$ bitbake homescreen-2017
 ```
 
 Instructions for building HomeScreen app
@@ -54,5 +54,5 @@ Launch HomeScreen App:
 Usage:
 
 ```
-afm-util start homescreen
+afm-util start homescreen-2017
 ```

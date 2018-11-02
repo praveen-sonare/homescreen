@@ -16,7 +16,7 @@
 
 #include "mastervolume.h"
 
-void MasterVolume::setVolume(int volume)
+void MasterVolume::setVolume(pa_volume_t volume)
 {
 	int volume_delta = volume - m_volume;
 	m_volume = volume;
