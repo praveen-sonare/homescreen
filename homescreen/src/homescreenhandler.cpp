@@ -48,7 +48,6 @@ void HomescreenHandler::init(int port, const char *token)
             json_object_object_get(object, "display_message"));
         HMI_DEBUG("HomeScreen","set_event_handler Event_OnScreenMessage display_message = %s", display_message);
     });
-
 }
 
 void HomescreenHandler::tapShortcut(QString application_name)

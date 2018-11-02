@@ -21,8 +21,18 @@ import QtQuick.Layouts 1.1
 
 Item {
     id: root
-    width: 785
-    height: 218
+    width: 700
+    height: 110
+
+    Timer {
+        id:informationTimer
+        interval: 3000
+        running: false
+        repeat: true
+        onTriggered: {
+            bottomInformation.visible = false
+        }
+    }
 
 
     ListModel {
@@ -36,12 +46,16 @@ Item {
             application: 'mediaplayer@0.1'
         }
         ListElement {
-            name: 'HVAC'
-            application: 'hvac@0.1'
+            name: 'navigation'
+            application: 'navigation@0.1'
         }
         ListElement {
-            name: 'Navigation'
-            application: 'navigation@0.1'
+            name: 'Phone'
+            application: 'phone@0.1'
+        }
+        ListElement {
+            name: 'settings'
+            application: 'settings@0.1'
         }
     }
 
@@ -49,16 +63,23 @@ Item {
 
     RowLayout {
         anchors.fill: parent
-        spacing: 2
+        spacing: 75
         Repeater {
             model: applicationModel
             delegate: ShortcutIcon {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
+//                Layout.fillWidth: true
+//                Layout.fillHeight: true
+                width: 60
+                height: 60
                 name: model.name
                 active: model.name === launcher.current
                 onClicked: {
-                    pid = launcher.launch(model.application)
+                    if(model.application === 'navigation@0.1') {
+                        pid = launcher.launch('browser@5.0')
+                    } else {
+                        pid = launcher.launch(model.application.toLowerCase())
+                    }
+
                     if (1 < pid) {
                         applicationArea.visible = true
                     }
@@ -66,9 +87,42 @@ Item {
                         console.warn(model.application)
                         console.warn("app cannot be launched!")
                     }
-                    homescreenHandler.tapShortcut(model.name)
+                    if(model.name === 'Navigation') {
+                        homescreenHandler.tapShortcut('browser')
+                    } else {
+                        homescreenHandler.tapShortcut(model.name)
+                    }
                 }
             }
+        }
+    }
+    Rectangle {
+        id: bottomInformation
+        width: parent.width
+        height: parent.height-20
+        anchors.bottom: parent.bottom
+        color: "gray"
+        z: 1
+        opacity: 0.8
+        visible: false
+
+        Text {
+            id: informationText
+            anchors.centerIn: parent
+            font.pixelSize: 25
+            font.letterSpacing: 5
+            horizontalAlignment: Text.AlignHCenter
+            color: "white"
+            text: ""
+        }
+    }
+
+    Connections {
+        target: homescreenHandler
+        onInformation: {
+            informationText.text = text
+            bottomInformation.visible = true
+            informationTimer.restart()
         }
     }
 }

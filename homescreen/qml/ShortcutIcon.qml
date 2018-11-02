@@ -21,8 +21,8 @@ import QtGraphicalEffects 1.0
 
 MouseArea {
     id: root
-    width: 195
-    height: 216.8
+    width: 70
+    height: 70
     property string name: 'Home'
     property bool active: false
     Item {
@@ -32,12 +32,12 @@ MouseArea {
         Image {
             id: inactiveIcon
             anchors.fill: parent
-                     source: './images/Shortcut/%1.svg'.arg(root.name.toLowerCase())
+            source: './images/Shortcut/%1.png'.arg(root.name.toLowerCase())
         }
         Image {
             id: activeIcon
             anchors.fill: parent
-            source: './images/Shortcut/%1_active.svg'.arg(root.name.toLowerCase())
+            source: './images/Shortcut/%1_active.png'.arg(root.name.toLowerCase())
             opacity: 0.0
         }
         layer.enabled: true
@@ -47,42 +47,6 @@ MouseArea {
             cached: true
         }
     }
-    Label {
-        id: name
-        y: 160
-        width: root.width - 10
-        font.pixelSize: 15
-        font.letterSpacing: 5
-        // wrapMode: Text.WordWrap
-        anchors.horizontalCenter: parent.horizontalCenter
-        horizontalAlignment: Text.AlignHCenter
-        color: "white"
-        text: qsTr(model.name.toUpperCase())
-    }
-    states: [
-        State {
-            when: launcher.launching
-            PropertyChanges {
-                target: root
-                enabled: false
-            }
-            PropertyChanges {
-                target: icon
-                desaturation: 1.0
-            }
-        },
-        State {
-            when: root.active
-            PropertyChanges {
-                target: inactiveIcon
-                opacity: 0.0
-            }
-            PropertyChanges {
-                target: activeIcon
-                opacity: 1.0
-            }
-        }
-    ]
 
     transitions: [
         Transition {
@@ -97,4 +61,14 @@ MouseArea {
             }
         }
     ]
+
+    onPressed: {
+        activeIcon.opacity = 1.0
+        inactiveIcon.opacity = 0.0
+    }
+
+    onReleased: {
+        activeIcon.opacity = 0.0
+        inactiveIcon.opacity = 1.0
+    }
 }

@@ -1,12 +1,16 @@
 <RCC>
     <qresource prefix="/images/Shortcut">
-        <file>launcher.svg</file>
-        <file>launcher_active.svg</file>
-        <file>hvac.svg</file>
-        <file>hvac_active.svg</file>
-        <file>mediaplayer.svg</file>
-        <file>mediaplayer_active.svg</file>
+        <file>launcher.png</file>
+        <file>launcher_active.png</file>
+        <file>mediaplayer.png</file>
+        <file>mediaplayer_active.png</file>
+        <file>navigation.png</file>
+        <file>navigation_active.png</file>
+        <file>phone.png</file>
+        <file>phone_active.png</file>
+        <file>settings.png</file>
+        <file>settings_active.png</file>
         <file>navigation.svg</file>
-        <file>navigation_active.svg</file>
+        <file>music.svg</file>
     </qresource>
 </RCC>
