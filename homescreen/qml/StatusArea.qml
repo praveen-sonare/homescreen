@@ -138,25 +138,9 @@ Item {
                 property bool connStatus: false
                 Connections {
                     target: bluetooth
-                    onConnectionEvent: {
-                        console.log("onConnectionEvent", data.Status)
-                        if (data.Status === "connected") {
-                            bt_icon.connStatus = true
-                        } else if (data.Status === "disconnected") {
-                            bt_icon.connStatus = false
-                        }
-                    }
-                    onDeviceUpdateEvent: {
-                        console.log("onConnectionEvent", data.Paired)
-                        if (data.Paired === "True" && data.Connected === "True") {
-                            bt_icon.deviceName = data.name
-                            bt_icon.connStatus = true
-                        } else {
-                            if(bt_icon.deviceName === data.Name)
-                            {
-                                bt_icon.connStatus = false
-                            }
-                        }
+
+                    onPowerChanged: {
+                            bt_icon.connStatus = state
                     }
                 }
             }
