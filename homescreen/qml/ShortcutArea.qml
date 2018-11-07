@@ -24,6 +24,13 @@ Item {
     width: 785
     height: 218
 
+    Timer {
+        id:notificationTimer
+        interval: 3000
+        running: false
+        repeat: true
+        onTriggered: notificationItem.visible = false
+    }
 
     ListModel {
         id: applicationModel
@@ -36,11 +43,11 @@ Item {
             application: 'mediaplayer@0.1'
         }
         ListElement {
-            name: 'HVAC'
-            application: 'hvac@0.1'
+            name: 'Video'
+            application: 'video@0.1'
         }
         ListElement {
-            name: 'Navigation'
+            name: 'navigation'
             application: 'navigation@0.1'
         }
     }
@@ -66,7 +73,7 @@ Item {
                         console.warn(model.application)
                         console.warn("app cannot be launched!")
                     }
-                    homescreenHandler.tapShortcut(model.name)
+                    homescreenHandler.tapShortcut(model.name, false)
                 }
             }
         }

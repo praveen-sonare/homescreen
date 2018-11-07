@@ -17,6 +17,8 @@
 #include <QtCore/QObject>
 #include <QQmlEngine>
 
+#include <pulse/pulseaudio.h>
+
 class MasterVolume : public QObject
 {
 	Q_OBJECT
@@ -31,7 +33,7 @@ class MasterVolume : public QObject
 		~MasterVolume() {}
 
 		uint32_t getVolume() const { return m_volume; }
-		void setVolume(int volume);
+		void setVolume(pa_volume_t volume);
 
 	public slots:
 		void changeExternalVolume(int volume);

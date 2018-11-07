@@ -24,7 +24,7 @@ import MasterVolume 1.0
 Image {
     width: 1080
     height: 215
-    source: './images/Utility_Logo_Background-01.svg'
+    source: './images/Utility_Logo_Background-01.png'
     property bool displayVolume: false;
 
     MouseArea {
