@@ -1,0 +1,15 @@
+type: books
+books:
+-
+    id: homescreen
+    languages:
+    - language: en
+      title: HomeScreen
+      description: HomeScreen documentation
+      keywords:
+      author: "IotBzh"
+      website: http:docs.iot.bzh
+      version: master
+      chapters:
+      - url: index.md
+        name: Overview
