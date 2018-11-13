@@ -24,7 +24,6 @@ Item {
     width: 785
     height: 218
 
-
     ListModel {
         id: applicationModel
         ListElement {
@@ -70,7 +69,7 @@ Item {
                         console.warn(model.application)
                         console.warn("app cannot be launched!")
                     }
-                    homescreenHandler.tapShortcut(model.appid)
+                    homescreenHandler.tapShortcut(model.appid, false)
                 }
             }
         }

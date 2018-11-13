@@ -6,5 +6,9 @@
         <file>Utility_Music_Background-01.png</file>
         <file>Utility_Radio_Background-01.png</file>
         <file>AGL_HMI_Blue_Background_NoCar-01.png</file>
+        <file>AGL_HMI_Full_Background.png</file>
+        <file>AGL_HMI_Normal_Background.png</file>
+        <file>fullscreen.png</file>
+        <file>normal.png</file>
     </qresource>
 </RCC>

@@ -117,11 +117,16 @@ Item {
             Layout.fillHeight: true
             Layout.preferredWidth: 76
             spacing: -10
+            Rectangle {
+                Layout.preferredWidth: 77
+                Layout.preferredHeight: 55
+                opacity: 0
+            }
 
             Image {
                 id: bt_icon
                 Layout.preferredWidth: 77
-                Layout.preferredHeight: 73
+                Layout.preferredHeight: 55
                 source: connStatus ? './images/Status/HMI_Status_Bluetooth_On-01.png' : './images/Status/HMI_Status_Bluetooth_Inactive-01.png'
                 fillMode: Image.PreserveAspectFit
                 property string deviceName: "none"
@@ -134,9 +139,9 @@ Item {
                     onConnectionEvent: {
                         // console.log("bluetooth connection is:", data.Status)
                         // console.log("onConnectionEvent bt_icon.deviceName:",bt_icon.deviceName, "bt_icon.connStatus:", bt_icon.connStatus)
-                        if (data.Status == "connected"){
+                        if (data.Status === "connected"){
                             bt_icon.connStatus = true
-                        } else if (data.Status == "disconnected"){
+                        } else if (data.Status === "disconnected"){
                             bt_icon.connStatus = false
                         }
                     }
@@ -144,11 +149,11 @@ Item {
                     onDeviceUpdatedEvent: {
                         // console.log("bluetooth onDeviceUpdatedEvent date is:", data.Name, "Paired: ", data.Paired, "Connected: ", data.Connected)
                         // console.log("onDeviceUpdatedEvent bt_icon.deviceName:",bt_icon.deviceName, "bt_icon.connStatus:", bt_icon.connStatus)
-                        if ( data.Paired == "True" &&  data.Connected == "True" ){
+                        if ( data.Paired === "True" &&  data.Connected === "True" ){
                             bt_icon.deviceName = data.Name
                             bt_icon.connStatus = true
                         } else {
-                            if(bt_icon.deviceName == data.Name)
+                            if(bt_icon.deviceName === data.Name)
                             {
                                 bt_icon.connStatus = false
                             }
@@ -160,7 +165,7 @@ Item {
                 model: StatusBarModel { objectName: "statusBar" }
                 delegate: Image {
                     Layout.preferredWidth: 77
-                    Layout.preferredHeight: 73
+                    Layout.preferredHeight: 55
                     source: model.modelData
                     fillMode: Image.PreserveAspectFit
                 }

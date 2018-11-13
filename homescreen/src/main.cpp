@@ -22,6 +22,7 @@
 #include <QtQml/QQmlContext>
 #include <QtQml/qqml.h>
 #include <QQuickWindow>
+#include <QThread>
 
 #include <qlibwindowmanager.h>
 #include <weather.h>
@@ -32,6 +33,7 @@
 #include "mastervolume.h"
 #include "homescreenhandler.h"
 #include "hmi-debug.h"
+#include "toucharea.h"
 
 // XXX: We want this DBus connection to be shared across the different
 // QML objects, is there another way to do this, a nice way, perhaps?
@@ -93,6 +95,9 @@ int main(int argc, char *argv[])
 
     ApplicationLauncher *launcher = new ApplicationLauncher();
     QLibWindowmanager* layoutHandler = new QLibWindowmanager();
+    TouchArea* touchArea = new TouchArea();
+    HomescreenHandler* homescreenHandler = new HomescreenHandler();
+    homescreenHandler->init(port, token.toStdString().c_str());
     if(layoutHandler->init(port,token) != 0){
         exit(EXIT_FAILURE);
     }
@@ -107,19 +112,17 @@ int main(int argc, char *argv[])
         layoutHandler->endDraw(QString("HomeScreen"));
     });
 
-    layoutHandler->set_event_handler(QLibWindowmanager::Event_ScreenUpdated, [layoutHandler, launcher](json_object *object) {
+    layoutHandler->set_event_handler(QLibWindowmanager::Event_ScreenUpdated, [layoutHandler, launcher, homescreenHandler](json_object *object) {
         json_object *jarray = json_object_object_get(object, "ids");
         int arrLen = json_object_array_length(jarray);
         for( int idx = 0; idx < arrLen; idx++)
         {
             QString label = QString(json_object_get_string(	json_object_array_get_idx(jarray, idx) ));
             HMI_DEBUG("HomeScreen","Event_ScreenUpdated application: %s.", label.toStdString().c_str());
+            homescreenHandler->setCurrentApplication(label);
             QMetaObject::invokeMethod(launcher, "setCurrent", Qt::QueuedConnection, Q_ARG(QString, label));
         }
     });
-
-    HomescreenHandler* homescreenHandler = new HomescreenHandler();
-    homescreenHandler->init(port, token.toStdString().c_str());
 
     QUrl bindingAddress;
     bindingAddress.setScheme(QStringLiteral("ws"));
@@ -139,10 +142,19 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("weather", new Weather(bindingAddress));
     engine.rootContext()->setContextProperty("bluetooth", new Bluetooth(bindingAddress));
     engine.rootContext()->setContextProperty("screenInfo", &screenInfo);
+    engine.rootContext()->setContextProperty("touchArea", touchArea);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
     QObject *root = engine.rootObjects().first();
     QQuickWindow *window = qobject_cast<QQuickWindow *>(root);
+
+    touchArea->setWindow(window);
+    QThread* thread = new QThread;
+    touchArea->moveToThread(thread);
+    QObject::connect(thread, &QThread::started, touchArea, &TouchArea::init);
+
+    thread->start();
+
     QObject::connect(window, SIGNAL(frameSwapped()), layoutHandler, SLOT(slotActivateSurface()));
 
     QList<QObject *> sobjs = engine.rootObjects();
