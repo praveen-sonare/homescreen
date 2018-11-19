@@ -136,18 +136,14 @@ Window {
                     container.state = 'fullscreen'
                     touchArea.switchArea(1)
                     homescreenHandler.tapShortcut(appName, true)
-                    if (appName === 'navigation' || appName === 'browser') {
-                        container.opacity = 0.0
-                    }
+                    container.opacity = 0.0
                 } else {
                     image.source = './images/normal.png'
                     btnState = 'normal'
                     container.state = 'normal'
                     touchArea.switchArea(0)
                     homescreenHandler.tapShortcut(appName, false)
-                    if (appName === 'navigation' || appName === 'browser') {
-                        container.opacity = 1.0
-                    }
+                    container.opacity = 1.0
                 }
             }
         }

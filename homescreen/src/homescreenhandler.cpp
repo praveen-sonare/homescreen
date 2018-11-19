@@ -60,7 +60,7 @@ void HomescreenHandler::init(int port, const char *token)
                    json_object_object_get(p_obj, "text"));
        QFileInfo icon_file(icon);
        QString icon_path;
-       if (icon_file.exists()) {
+       if (icon_file.isFile() && icon_file.exists()) {
            icon_path = QString(QLatin1String(icon));
        } else {
            icon_path = "./images/Utility_Logo_Grey-01.svg";
