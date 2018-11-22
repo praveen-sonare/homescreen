@@ -10,5 +10,6 @@
         <file>AGL_HMI_Normal_Background.png</file>
         <file>fullscreen.png</file>
         <file>normal.png</file>
+        <file>normal_disable.png</file>
     </qresource>
 </RCC>

@@ -96,6 +96,7 @@ int main(int argc, char *argv[])
     ApplicationLauncher *launcher = new ApplicationLauncher();
     QLibWindowmanager* layoutHandler = new QLibWindowmanager();
     HomescreenHandler* homescreenHandler = new HomescreenHandler();
+
     if(layoutHandler->init(port,token) != 0){
         exit(EXIT_FAILURE);
     }
@@ -103,23 +104,6 @@ int main(int argc, char *argv[])
     if (layoutHandler->requestSurface(QString("HomeScreen")) != 0) {
         exit(EXIT_FAILURE);
     }
-
-    layoutHandler->set_event_handler(QLibWindowmanager::Event_SyncDraw, [layoutHandler](json_object *object) {
-        layoutHandler->endDraw(QString("HomeScreen"));
-    });
-
-    layoutHandler->set_event_handler(QLibWindowmanager::Event_ScreenUpdated, [layoutHandler, launcher, homescreenHandler](json_object *object) {
-        json_object *jarray = json_object_object_get(object, "ids");
-        int arrLen = json_object_array_length(jarray);
-        for( int idx = 0; idx < arrLen; idx++)
-        {
-            QString label = QString(json_object_get_string(	json_object_array_get_idx(jarray, idx) ));
-            HMI_DEBUG("HomeScreen","Event_ScreenUpdated application11: %s.", label.toStdString().c_str());
-            homescreenHandler->setCurrentApplication(label);
-            QMetaObject::invokeMethod(launcher, "setCurrent", Qt::QueuedConnection, Q_ARG(QString, label));
-        }
-    });
-
 
     QUrl bindingAddress;
     bindingAddress.setScheme(QStringLiteral("ws"));
@@ -145,6 +129,23 @@ int main(int argc, char *argv[])
 
     QObject *root = engine.rootObjects().first();
     QQuickWindow *window = qobject_cast<QQuickWindow *>(root);
+
+    layoutHandler->set_event_handler(QLibWindowmanager::Event_SyncDraw, [layoutHandler](json_object *object) {
+        layoutHandler->endDraw(QString("HomeScreen"));
+    });
+
+    layoutHandler->set_event_handler(QLibWindowmanager::Event_ScreenUpdated, [layoutHandler, launcher, homescreenHandler, root](json_object *object) {
+        json_object *jarray = json_object_object_get(object, "ids");
+        int arrLen = json_object_array_length(jarray);
+        for( int idx = 0; idx < arrLen; idx++)
+        {
+            QString label = QString(json_object_get_string(	json_object_array_get_idx(jarray, idx) ));
+            HMI_DEBUG("HomeScreen","Event_ScreenUpdated application11: %s.", label.toStdString().c_str());
+            homescreenHandler->setCurrentApplication(label);
+            QMetaObject::invokeMethod(launcher, "setCurrent", Qt::QueuedConnection, Q_ARG(QString, label));
+            QMetaObject::invokeMethod(root, "changeSwitchState", Q_ARG(QVariant, homescreenHandler->isSplit()));
+        }
+    });
 
     touchArea->setWindow(window);
     QThread* thread = new QThread;

@@ -39,8 +39,8 @@ Item {
             application: 'launcher@0.1'
         }
         ListElement {
-            name: 'MediaPlayer'
-            application: 'mediaplayer@0.1'
+            name: 'SDL'
+            application: 'sdl@5.0'
         }
         ListElement {
             name: 'Video'

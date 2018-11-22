@@ -62,6 +62,8 @@ Window {
             }
         }
 
+        state: "normal"
+
         states: [
             State {
                 name: "normal"
@@ -112,43 +114,51 @@ Window {
     }
     Item {
         id: switchBtn
+        width: 70
+        height: 70
         anchors.right: parent.right
-        anchors.rightMargin: 20
         anchors.top: parent.top
-        anchors.topMargin: 25
-        width: 35
-        height: 35
         z: 1
+        property bool enableSwitchBtn: true
+        Image {
+            anchors.right: parent.right
+            anchors.rightMargin: 20
+            anchors.top: parent.top
+            anchors.topMargin: 25
+            width: 35
+            height: 35
+            id: image
+            source: './images/normal.png'
+        }
 
         MouseArea {
             anchors.fill: parent
-            property string btnState: 'normal'
-            Image {
-                id: image
-                anchors.fill: parent
-                source: './images/normal.png'
-            }
             onClicked: {
-                var appName = homescreenHandler.getCurrentApplication()
-                if (btnState === 'normal') {
-                    image.source = './images/fullscreen.png'
-                    btnState = 'fullscreen'
-                    container.state = 'fullscreen'
-                    touchArea.switchArea(1)
-                    homescreenHandler.tapShortcut(appName, true)
-                    if (appName === 'navigation' || appName === 'browser') {
-                        container.opacity = 0.0
-                    }
-                } else {
-                    image.source = './images/normal.png'
-                    btnState = 'normal'
-                    container.state = 'normal'
-                    touchArea.switchArea(0)
-                    homescreenHandler.tapShortcut(appName, false)
-                    if (appName === 'navigation' || appName === 'browser') {
-                        container.opacity = 1.0
+                if(switchBtn.enableSwitchBtn) {
+                    var appName = homescreenHandler.getCurrentApplication()
+                    if (container.state === 'normal') {
+                        image.source = './images/fullscreen.png'
+                        container.state = 'fullscreen'
+                        touchArea.switchArea(1)
+                        homescreenHandler.tapShortcut(appName, true)
+                    } else {
+                        image.source = './images/normal.png'
+                        container.state = 'normal'
+                        touchArea.switchArea(0)
+                        homescreenHandler.tapShortcut(appName, false)
                     }
                 }
+            }
+        }
+    }
+    function changeSwitchState(is_split) {
+        if(container.state === 'normal') {
+            if(is_split) {
+                switchBtn.enableSwitchBtn = false
+                image.source = './images/normal_disable.png'
+            } else {
+                switchBtn.enableSwitchBtn = true
+                image.source = './images/normal.png'
             }
         }
     }

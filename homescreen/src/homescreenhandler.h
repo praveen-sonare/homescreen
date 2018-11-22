@@ -35,6 +35,7 @@ public:
     Q_INVOKABLE void tapShortcut(QString application_name, bool is_full);
     Q_INVOKABLE QString getCurrentApplication();
     void setCurrentApplication(QString application_name);
+    bool isSplit();
 
     void onRep(struct json_object* reply_contents);
     void onEv(const string& event, struct json_object* event_contents);
@@ -49,7 +50,7 @@ signals:
 
 private:
     LibHomeScreen *mp_hs;
-    QString current_applciation;
+    QString previous_application, current_applciation;
 };
 
 #endif // HOMESCREENHANDLER_H
