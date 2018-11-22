@@ -134,38 +134,44 @@ Window {
 
     Item {
         id: switchBtn
+        width: 110
+        height: 110
         anchors.right: parent.right
-        anchors.rightMargin: 20
         anchors.top: parent.top
-        anchors.topMargin: 5
-        width: 55
-        height: 55
         z: 1
+        Image {
+            id: image
+            width: 55
+            height: 55
+            anchors.right: parent.right
+            anchors.rightMargin: 20
+            anchors.top: parent.top
+            anchors.topMargin: 5
+            source: './images/normal.png'
+        }
 
         MouseArea {
             anchors.fill: parent
             property string btnState: 'normal'
-            Image {
-                id: image
-                anchors.fill: parent
-                source: './images/normal.png'
-            }
             onClicked: {
-                if (btnState === 'normal') {
-                    image.source = './images/fullscreen.png'
-                    btnState = 'fullscreen'
-                    container.state = 'fullscreen'
-                    container.opacity = 0.0
-                    touchArea.switchArea(1)
-
+                if (container.state === 'normal') {
+                    turnToFullscreen()
                 } else {
-                    image.source = './images/normal.png'
-                    btnState = 'normal'
-                    container.state = 'normal'
-                    container.opacity = 1.0
-                    touchArea.switchArea(0)
+                    turnToNormal()
                 }
             }
         }
+    }
+    function turnToFullscreen() {
+        image.source = './images/fullscreen.png'
+        container.state = 'fullscreen'
+        container.opacity = 0.0
+        touchArea.switchArea(1)
+    }
+    function turnToNormal() {
+        image.source = './images/normal.png'
+        container.state = 'normal'
+        container.opacity = 1.0
+        touchArea.switchArea(0)
     }
 }

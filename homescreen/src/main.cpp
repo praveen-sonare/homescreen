@@ -93,6 +93,9 @@ int main(int argc, char *argv[])
     qmlRegisterType<StatusBarModel>("HomeScreen", 1, 0, "StatusBarModel");
 
     ApplicationLauncher *launcher = new ApplicationLauncher();
+    HomescreenHandler* homescreenHandler = new HomescreenHandler();
+    homescreenHandler->init(port, token.toStdString().c_str());
+
     QLibWindowmanager* layoutHandler = new QLibWindowmanager();
     if(layoutHandler->init(port,token) != 0){
         exit(EXIT_FAILURE);
@@ -101,24 +104,6 @@ int main(int argc, char *argv[])
     if (layoutHandler->requestSurface(QString("homescreen")) != 0) {
         exit(EXIT_FAILURE);
     }
-
-    layoutHandler->set_event_handler(QLibWindowmanager::Event_SyncDraw, [layoutHandler](json_object *object) {
-        layoutHandler->endDraw(QString("homescreen"));
-    });
-
-    layoutHandler->set_event_handler(QLibWindowmanager::Event_ScreenUpdated, [layoutHandler, launcher](json_object *object) {
-        json_object *jarray = json_object_object_get(object, "ids");
-        int arrLen = json_object_array_length(jarray);
-        for( int idx = 0; idx < arrLen; idx++)
-        {
-            QString label = QString(json_object_get_string(	json_object_array_get_idx(jarray, idx) ));
-            HMI_DEBUG("HomeScreen","Event_ScreenUpdated application: %s.", label.toStdString().c_str());
-            QMetaObject::invokeMethod(launcher, "setCurrent", Qt::QueuedConnection, Q_ARG(QString, label));
-        }
-    });
-
-    HomescreenHandler* homescreenHandler = new HomescreenHandler();
-    homescreenHandler->init(port, token.toStdString().c_str());
 
     QUrl bindingAddress;
     bindingAddress.setScheme(QStringLiteral("ws"));
@@ -134,7 +119,7 @@ int main(int argc, char *argv[])
 
     // mail.qml loading
     QQmlApplicationEngine engine;
-    engine.rootContext()->setContextProperty("layoutHandler", layoutHandler);
+//    engine.rootContext()->setContextProperty("layoutHandler", layoutHandler);
     engine.rootContext()->setContextProperty("homescreenHandler", homescreenHandler);
     engine.rootContext()->setContextProperty("touchArea", touchArea);
     engine.rootContext()->setContextProperty("launcher", launcher);
@@ -143,6 +128,29 @@ int main(int argc, char *argv[])
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
     QObject *root = engine.rootObjects().first();
+
+    layoutHandler->set_event_handler(QLibWindowmanager::Event_SyncDraw, [layoutHandler](json_object *object) {
+        layoutHandler->endDraw(QString("homescreen"));
+    });
+
+    layoutHandler->set_event_handler(QLibWindowmanager::Event_ScreenUpdated, [layoutHandler, launcher, root](json_object *object) {
+        json_object *jarray = json_object_object_get(object, "ids");
+        int arrLen = json_object_array_length(jarray);
+        for( int idx = 0; idx < arrLen; idx++)
+        {
+            QString label = QString(json_object_get_string(	json_object_array_get_idx(jarray, idx) ));
+            HMI_DEBUG("HomeScreen","Event_ScreenUpdated application: %s.", label.toStdString().c_str());
+            QMetaObject::invokeMethod(launcher, "setCurrent", Qt::QueuedConnection, Q_ARG(QString, label));
+            if(label == "launcher") {
+                QMetaObject::invokeMethod(root, "turnToNormal");
+//                homescreenHandler->emitTurnToFullscreen(false);
+            } else {
+                QMetaObject::invokeMethod(root, "turnToFullscreen");
+//                homescreenHandler->emitTurnToFullscreen(true);
+            }
+        }
+    });
+
     QQuickWindow *window = qobject_cast<QQuickWindow *>(root);
 
     touchArea->setWindow(window);
