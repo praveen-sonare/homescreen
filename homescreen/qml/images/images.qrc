@@ -5,5 +5,7 @@
         <file>menubar_full_background.png</file>
         <file>fullscreen.png</file>
         <file>normal.png</file>
+        <file>split_switch.png</file>
+        <file>split_switch_disable.png</file>
     </qresource>
 </RCC>

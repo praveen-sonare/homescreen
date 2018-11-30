@@ -18,9 +18,9 @@ TARGET = HomeScreen
 QT = qml quick dbus websockets
 CONFIG += c++11 link_pkgconfig
 DESTDIR = $${OUT_PWD}/../package/root/bin
-PKGCONFIG += qlibwindowmanager qtappfw
+PKGCONFIG += libwindowmanager qtappfw
 
-LIBS += -lhomescreen
+LIBS += -lhomescreen -lwindowmanager
 
 include(../interfaces/interfaces.pri)
 

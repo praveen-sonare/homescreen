@@ -24,7 +24,6 @@
 #include <QQuickWindow>
 #include <QThread>
 
-#include <qlibwindowmanager.h>
 #include <weather.h>
 #include <bluetooth.h>
 #include "applicationlauncher.h"
@@ -57,6 +56,7 @@ void noOutput(QtMsgType, const QMessageLogContext &, const QString &)
 int main(int argc, char *argv[])
 {
     QGuiApplication a(argc, argv);
+    const char* graphic_role = "homescreen";
 
     // use launch process
     QScopedPointer<org::AGL::afm::user, Cleanup> afm_user_daemon_proxy(new org::AGL::afm::user("org.AGL.afm.user",
@@ -94,16 +94,7 @@ int main(int argc, char *argv[])
 
     ApplicationLauncher *launcher = new ApplicationLauncher();
     HomescreenHandler* homescreenHandler = new HomescreenHandler();
-    homescreenHandler->init(port, token.toStdString().c_str());
-
-    QLibWindowmanager* layoutHandler = new QLibWindowmanager();
-    if(layoutHandler->init(port,token) != 0){
-        exit(EXIT_FAILURE);
-    }
-
-    if (layoutHandler->requestSurface(QString("homescreen")) != 0) {
-        exit(EXIT_FAILURE);
-    }
+    homescreenHandler->init(graphic_role, port, token.toStdString().c_str());
 
     QUrl bindingAddress;
     bindingAddress.setScheme(QStringLiteral("ws"));
@@ -119,7 +110,6 @@ int main(int argc, char *argv[])
 
     // mail.qml loading
     QQmlApplicationEngine engine;
-//    engine.rootContext()->setContextProperty("layoutHandler", layoutHandler);
     engine.rootContext()->setContextProperty("homescreenHandler", homescreenHandler);
     engine.rootContext()->setContextProperty("touchArea", touchArea);
     engine.rootContext()->setContextProperty("launcher", launcher);
@@ -129,27 +119,32 @@ int main(int argc, char *argv[])
 
     QObject *root = engine.rootObjects().first();
 
-    layoutHandler->set_event_handler(QLibWindowmanager::Event_SyncDraw, [layoutHandler](json_object *object) {
-        layoutHandler->endDraw(QString("homescreen"));
-    });
-
-    layoutHandler->set_event_handler(QLibWindowmanager::Event_ScreenUpdated, [layoutHandler, launcher, root](json_object *object) {
-        json_object *jarray = json_object_object_get(object, "ids");
-        int arrLen = json_object_array_length(jarray);
+    WMHandler wmh;
+    wmh.on_screen_updated = [launcher, root](std::vector<std::string> list) {
+        for(const auto& i : list) {
+            HMI_DEBUG("HomeScreen", "ids=%s", i.c_str());
+        }
+        int arrLen = list.size();
+        QString label = QString("");
         for( int idx = 0; idx < arrLen; idx++)
         {
-            QString label = QString(json_object_get_string(	json_object_array_get_idx(jarray, idx) ));
+            label = list[idx].c_str();
             HMI_DEBUG("HomeScreen","Event_ScreenUpdated application: %s.", label.toStdString().c_str());
             QMetaObject::invokeMethod(launcher, "setCurrent", Qt::QueuedConnection, Q_ARG(QString, label));
             if(label == "launcher") {
                 QMetaObject::invokeMethod(root, "turnToNormal");
-//                homescreenHandler->emitTurnToFullscreen(false);
             } else {
                 QMetaObject::invokeMethod(root, "turnToFullscreen");
-//                homescreenHandler->emitTurnToFullscreen(true);
+            }
+            if((arrLen == 1) && (QString("restriction") != label)) {
+                QMetaObject::invokeMethod(root, "disableSplitSwitchBtn");
+            } else {
+                QMetaObject::invokeMethod(root, "enableSplitSwitchBtn");
             }
         }
-    });
+    };
+    homescreenHandler->setWMHandler(wmh);
+    homescreenHandler->attach(&engine);
 
     QQuickWindow *window = qobject_cast<QQuickWindow *>(root);
 
@@ -163,8 +158,6 @@ int main(int argc, char *argv[])
     QList<QObject *> sobjs = engine.rootObjects();
     StatusBarModel *statusBar = sobjs.first()->findChild<StatusBarModel *>("statusBar");
     statusBar->init(bindingAddress, engine.rootContext());
-
-    QObject::connect(window, SIGNAL(frameSwapped()), layoutHandler, SLOT(slotActivateSurface()));
 
     return a.exec();
 }

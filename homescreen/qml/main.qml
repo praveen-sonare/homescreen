@@ -128,25 +128,20 @@ Window {
         }
     }
 
-
-
-
-
     Item {
         id: switchBtn
-        width: 110
-        height: 110
+        width: 61
+        height: 61
         anchors.right: parent.right
+        anchors.rightMargin: 17
         anchors.top: parent.top
+        anchors.topMargin: 2
         z: 1
         Image {
             id: image
             width: 55
             height: 55
-            anchors.right: parent.right
-            anchors.rightMargin: 20
-            anchors.top: parent.top
-            anchors.topMargin: 5
+            anchors.centerIn: parent
             source: './images/normal.png'
         }
 
@@ -162,16 +157,68 @@ Window {
             }
         }
     }
+
+    Item {
+        id: splitSwitchBtn
+        width: 61
+        height: 61
+        anchors.right: switchBtn.left
+        anchors.top: parent.top
+        anchors.topMargin: 2
+        z: 1
+        property bool enableSplitSwitchBtn: false
+        Image {
+            id: splitSwitchImage
+            width: 55
+            height: 55
+            anchors.centerIn: parent
+            source: './images/split_switch_disable.png'
+        }
+
+        MouseArea {
+            property bool changed : false
+            anchors.fill: parent
+            onClicked: {
+                if (splitSwitchBtn.enableSplitSwitchBtn) {
+                    if(changed) {
+                        switchSplitArea(0)
+                        changed = false
+                    }
+                    else {
+                        switchSplitArea(1)
+                        changed = true
+                    }
+                }
+            }
+        }
+    }
+
+
     function turnToFullscreen() {
         image.source = './images/fullscreen.png'
         container.state = 'fullscreen'
         container.opacity = 0.0
         touchArea.switchArea(1)
     }
+
     function turnToNormal() {
         image.source = './images/normal.png'
         container.state = 'normal'
         container.opacity = 1.0
         touchArea.switchArea(0)
+    }
+
+    function enableSplitSwitchBtn() {
+        splitSwitchImage.source = './images/split_switch.png'
+        splitSwitchBtn.enableSplitSwitchBtn = true
+    }
+
+    function disableSplitSwitchBtn() {
+        splitSwitchImage.source = './images/split_switch_disable.png'
+        splitSwitchBtn.enableSplitSwitchBtn = false;
+    }
+
+    function switchSplitArea(val) {
+        homescreenHandler.changeLayout(val);
     }
 }

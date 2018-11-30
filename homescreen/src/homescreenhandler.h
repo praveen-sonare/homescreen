@@ -19,20 +19,31 @@
 
 #include <QObject>
 #include <libhomescreen.hpp>
+#include <libwindowmanager.h>
 #include <string>
 
 using namespace std;
+
+class QQmlApplicationEngine;
 
 class HomescreenHandler : public QObject
 {
     Q_OBJECT
 public:
+    enum CHANGE_LAYOUT_PATTERN {
+        P_LEFT_METER_RIGHT_MAP = 0,
+        P_LEFT_MAP_RIGHT_METER
+    };
+    Q_ENUMS(CHANGE_LAYOUT_PATTERN)
     explicit HomescreenHandler(QObject *parent = 0);
     ~HomescreenHandler();
 
-    void init(int port, const char* token);
+    void init(const char* role, int port, const char* token);
+    void attach(QQmlApplicationEngine* engine);
+    void setWMHandler(WMHandler &handler);
 
     Q_INVOKABLE void tapShortcut(QString application_name);
+    Q_INVOKABLE void changeLayout(int pattern);
 
     void onRep(struct json_object* reply_contents);
     void onEv(const string& event, struct json_object* event_contents);
@@ -45,8 +56,14 @@ signals:
     void notification(QString id, QString icon, QString text);
     void information(QString text);
 
+private Q_SLOTS:
+    void disconnect_frame_swapped(void);
+
 private:
     LibHomeScreen *mp_hs;
+    LibWindowmanager *mp_wm;
+    std::string m_role;
+    QMetaObject::Connection loading;
 };
 
 #endif // HOMESCREENHANDLER_H
