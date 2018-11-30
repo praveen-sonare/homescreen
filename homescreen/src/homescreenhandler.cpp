@@ -23,7 +23,6 @@ void* HomescreenHandler::myThis = 0;
 HomescreenHandler::HomescreenHandler(QObject *parent) :
     QObject(parent),
     mp_hs(NULL),
-    previous_application("launcher"),
     current_applciation("launcher")
 {
 
@@ -68,20 +67,9 @@ void HomescreenHandler::tapShortcut(QString application_name, bool is_full)
     mp_hs->showWindow(application_name.toStdString().c_str(), j_json);
 }
 
-bool HomescreenHandler::isSplit()
-{
-    if(current_applciation == "video") {
-        if(previous_application == "navigation") {
-            return true;
-        }
-    }
-    return false;
-}
-
 void HomescreenHandler::setCurrentApplication(QString application_name)
 {
     HMI_DEBUG("HomeScreen","setCurrentApplication %s", application_name.toStdString().c_str());
-    previous_application = current_applciation;
     current_applciation = application_name;
 }
 

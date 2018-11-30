@@ -141,24 +141,26 @@ Window {
                         container.state = 'fullscreen'
                         touchArea.switchArea(1)
                         homescreenHandler.tapShortcut(appName, true)
+                        container.opacity = 0.0
                     } else {
                         image.source = './images/normal.png'
                         container.state = 'normal'
                         touchArea.switchArea(0)
                         homescreenHandler.tapShortcut(appName, false)
+                        container.opacity = 1.0
                     }
                 }
             }
         }
     }
-    function changeSwitchState(is_split) {
+    function changeSwitchState(is_navigation) {
         if(container.state === 'normal') {
-            if(is_split) {
-                switchBtn.enableSwitchBtn = false
-                image.source = './images/normal_disable.png'
-            } else {
+            if(is_navigation) {
                 switchBtn.enableSwitchBtn = true
                 image.source = './images/normal.png'
+            } else {
+                switchBtn.enableSwitchBtn = false
+                image.source = './images/normal_disable.png'
             }
         }
     }
