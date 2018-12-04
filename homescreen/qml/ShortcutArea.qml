@@ -39,8 +39,8 @@ Item {
             application: 'launcher@0.1'
         }
         ListElement {
-            name: 'SDL'
-            application: 'sdl@5.0'
+            name: 'sdl_usb'
+            application: 'sdl_usb@5.0'
         }
         ListElement {
             name: 'Video'
