@@ -29,16 +29,26 @@ Window {
     color: "#00000000"
 
     Image {
+        id: fullscreen_back
+        anchors.centerIn: parent
+        width: 1920
+        height: 1080
+        source: './images/menubar_fullscreen_background.png'
+    }
+
+    Image {
         id: container
         anchors.centerIn: parent
         width: 1920
-        height: 720
+        height: 1080
         scale: 1.0
         source: './images/menubar_background.png'
 
         ColumnLayout {
             id: menuBar
-            anchors.fill: parent
+            width: 1920
+            height: 720
+//            y:180
             spacing: 0
             TopArea {
                 id: topArea
@@ -71,38 +81,38 @@ Window {
                 name: "normal"
                 PropertyChanges {
                     target: container
-                    y: 0
+                    y: 180
                 }
                 PropertyChanges {
                     target: topArea
-                    y: 0
+                    y: 180
                 }
                 PropertyChanges {
                     target: applicationArea
-                    y: 80
+                    y: 260
                 }
                 PropertyChanges {
                     target: shortcutArea
-                    y: 590
+                    y: 770
                 }
             },
             State {
                 name: "fullscreen"
                 PropertyChanges {
                     target: container
-                    y: -720
+                    y: -900
                 }
                 PropertyChanges {
                     target: topArea
-                    y: -80
+                    y: -260
                 }
                 PropertyChanges {
                     target: applicationArea
-                    y: -510
+                    y: -590
                 }
                 PropertyChanges {
                     target: shortcutArea
-                    y: 720
+                    y: 900
                 }
             }
         ]
@@ -135,7 +145,7 @@ Window {
         anchors.right: parent.right
         anchors.rightMargin: 17
         anchors.top: parent.top
-        anchors.topMargin: 2
+        anchors.topMargin: 182
         z: 1
         Image {
             id: image
@@ -164,7 +174,7 @@ Window {
         height: 61
         anchors.right: switchBtn.left
         anchors.top: parent.top
-        anchors.topMargin: 2
+        anchors.topMargin: 182
         z: 1
         property bool enableSplitSwitchBtn: false
         Image {
