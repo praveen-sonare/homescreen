@@ -30,14 +30,16 @@ SOURCES += \
     src/statusbarserver.cpp \
     src/applicationlauncher.cpp \
     src/mastervolume.cpp \
-    src/homescreenhandler.cpp
+    src/homescreenhandler.cpp \
+    helpers/qafbwebsocketclient.cpp
 
 HEADERS  += \
     src/statusbarmodel.h \
     src/statusbarserver.h \
     src/applicationlauncher.h \
     src/mastervolume.h \
-    src/homescreenhandler.h
+    src/homescreenhandler.h \
+    helpers/qafbwebsocketclient.h
 
 OTHER_FILES += \
     README.md

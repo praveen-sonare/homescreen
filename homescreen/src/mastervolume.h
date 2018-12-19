@@ -16,31 +16,34 @@
 
 #include <QtCore/QObject>
 #include <QQmlEngine>
+#include "../helpers/qafbwebsocketclient.h"
 
-class MasterVolume : public QObject
+class MasterVolume
+	: public QObject
 {
 	Q_OBJECT
-		Q_PROPERTY (uint32_t volume READ getVolume WRITE setVolume NOTIFY volumeChanged)
+	Q_PROPERTY (uint32_t volume READ getVolume WRITE setVolume NOTIFY VolumeChanged)
 
-	public:
-		MasterVolume(QObject *parent = 0)
-			: QObject(parent), m_volume(32768)
-		{
-		}
+private:
+	QAfbWebsocketClient m_client;
+	QUrl m_url;
+	qint32 m_volume;
 
-		~MasterVolume() {}
+public:
+	MasterVolume(QObject* parent = nullptr);
+	~MasterVolume() = default;
 
-		uint32_t getVolume() const { return m_volume; }
-		void setVolume(int volume);
+	Q_INVOKABLE void open(const QUrl& url);
+	Q_INVOKABLE qint32 getVolume() const;
+	Q_INVOKABLE void setVolume(qint32 val);
 
-	public slots:
-		void changeExternalVolume(int volume);
+private slots:
+	void onClientConnected();
+	void onClientDisconnected();
+	void onClientError(QAbstractSocket::SocketError se);
+	void onClientEventReceived(QString name, const QJsonValue& data);
+	void TryOpen();
 
-	signals:
-		void volumeChanged(void);
-		void sliderVolumeChanged(int volume_delta);
-		void externalVolumeChanged(uint32_t volume);
-
-	private:
-		uint32_t m_volume;
+signals:
+	void VolumeChanged();
 };

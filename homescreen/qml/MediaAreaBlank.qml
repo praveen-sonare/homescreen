@@ -72,6 +72,9 @@ Image {
         id: mv
         objectName: "mv"
         onVolumeChanged: slider.value = volume
+        Component.onCompleted: {
+            mv.open(bindingAddress);
+        }
     }
 
     Item {
@@ -84,7 +87,7 @@ Image {
             font.pixelSize: 36
             anchors.horizontalCenter: parent.horizontalCenter
             color: "white"
-            text: qsTr("Master Volume")
+            text: qsTr("Active Volume")
         }
 
         RowLayout {
@@ -101,8 +104,8 @@ Image {
                 id: slider
                 Layout.fillWidth: true
                 from: 0
-                to: 65536
-                stepSize: 256
+                to: 100
+                stepSize: 1
                 snapMode: Slider.SnapOnRelease
                 onValueChanged: mv.volume = value
                 Component.onCompleted: value = mv.volume

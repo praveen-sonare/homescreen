@@ -133,6 +133,7 @@ int main(int argc, char *argv[])
 
     // mail.qml loading
     QQmlApplicationEngine engine;
+    engine.rootContext()->setContextProperty("bindingAddress", bindingAddress);
     engine.rootContext()->setContextProperty("layoutHandler", layoutHandler);
     engine.rootContext()->setContextProperty("homescreenHandler", homescreenHandler);
     engine.rootContext()->setContextProperty("launcher", launcher);
