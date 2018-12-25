@@ -34,7 +34,9 @@ public:
 
     Q_INVOKABLE void tapShortcut(QString application_name, bool is_full);
     Q_INVOKABLE QString getCurrentApplication();
+    Q_INVOKABLE void killRunningApplications();
     void setCurrentApplication(QString application_name);
+    int getPidOfApplication(QString application_name);
 
     void onRep(struct json_object* reply_contents);
     void onEv(const string& event, struct json_object* event_contents);

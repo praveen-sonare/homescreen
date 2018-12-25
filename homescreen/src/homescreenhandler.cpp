@@ -16,7 +16,12 @@
 
 #include "homescreenhandler.h"
 #include <functional>
+#include <QProcess>
+#include <dirent.h>
+#include <stdio.h>
 #include "hmi-debug.h"
+
+#define BUF_SIZE                        1024
 
 void* HomescreenHandler::myThis = 0;
 
@@ -77,6 +82,54 @@ QString HomescreenHandler::getCurrentApplication()
 {
     HMI_DEBUG("HomeScreen","getCurrentApplication %s", current_applciation.toStdString().c_str());
     return current_applciation;
+}
+
+int HomescreenHandler::getPidOfApplication(QString application_name) {
+    DIR *dir = NULL;
+    struct dirent *dir_ent_ptr = NULL;
+    FILE *fp = NULL;
+    char file_path[50] = {0};
+    char cur_task_ame[50] = {0};
+    char buf[BUF_SIZE] = {0};
+    int pid = -1;
+
+    dir = opendir("/proc");
+    if (dir) {
+        while((dir_ent_ptr = readdir(dir)) != NULL) {
+            if ((strcmp(dir_ent_ptr->d_name, ".") == 0) || (strcmp(dir_ent_ptr->d_name, "..") == 0)
+                || (DT_DIR != dir_ent_ptr->d_type))
+                continue;
+            sprintf(file_path, "/proc/%s/status", dir_ent_ptr->d_name);
+            fp = fopen(file_path, "r");
+            if (fp) {
+                if (fgets(buf, BUF_SIZE - 1, fp) == NULL) {
+                    fclose(fp);
+                    continue;
+                }
+                sscanf(buf, "%*s %s", cur_task_ame);
+                if (0 == strcmp(application_name.toStdString().c_str(), cur_task_ame)) {
+                    pid = atoi(dir_ent_ptr->d_name);
+                    break;
+                }
+            }
+        }
+    }
+
+    return pid;
+}
+
+void HomescreenHandler::killRunningApplications()
+{
+    QProcess *proc = new QProcess;
+    QProcess *proc2 = new QProcess;
+//    int num = getPidOfApplication("afbd-video@0.1");
+//    QString procNum = QString::number(num);
+    QString command = "/usr/bin/pkill videoplayer";
+    QString command2 = "/usr/bin/pkill navigation";
+    proc->start(command);
+    proc2->start(command2);
+    HMI_DEBUG("homescreen", command.toStdString().c_str());
+    HMI_DEBUG("homescreen", command2.toStdString().c_str());
 }
 
 void HomescreenHandler::onRep_static(struct json_object* reply_contents)

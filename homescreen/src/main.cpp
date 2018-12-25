@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
             homescreenHandler->setCurrentApplication(label);
             QMetaObject::invokeMethod(launcher, "setCurrent", Qt::QueuedConnection, Q_ARG(QString, label));
         }
-        if((arrLen == 1) && (QString("navigation") == label)){
+        if((arrLen == 1) && ( (QString("navigation") == label) || (QString("mixer") == label) )){
             QMetaObject::invokeMethod(root, "changeSwitchState", Q_ARG(QVariant, true));
         }else{
             QMetaObject::invokeMethod(root, "changeSwitchState", Q_ARG(QVariant, false));

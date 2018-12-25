@@ -109,6 +109,12 @@ Item {
                         font.pixelSize: 32
                     }
                 }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        homescreenHandler.killRunningApplications()
+                    }
+                }
             }
         }
         ColumnLayout {
