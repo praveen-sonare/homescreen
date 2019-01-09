@@ -1,0 +1,12 @@
+type: books
+books:
+-
+    id: homescreen
+    title: Homescreen
+    description: Homescreen documentation
+    keywords:
+    author: "TOYOTA MOTOR CORPORATION"
+    version: flounder
+    chapters:
+    - url: homescreen_api.md
+      name: HomeScreen API
