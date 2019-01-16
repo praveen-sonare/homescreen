@@ -51,14 +51,14 @@ void HomescreenHandler::init(int port, const char *token)
     });
 
     mp_hs->set_event_handler(LibHomeScreen::Event_ShowNotification,[this](json_object *object){
-       const char *application_id = json_object_get_string(
-                   json_object_object_get(object, "application_id"));
-
        json_object *p_obj = json_object_object_get(object, "parameter");
        const char *icon = json_object_get_string(
                    json_object_object_get(p_obj, "icon"));
        const char *text = json_object_get_string(
                    json_object_object_get(p_obj, "text"));
+       const char *app_id = json_object_get_string(
+                   json_object_object_get(p_obj, "caller"));
+       HMI_DEBUG("HomeScreen","Event_ShowNotification icon=%s, text=%s, caller=%s", icon, text, app_id);
        QFileInfo icon_file(icon);
        QString icon_path;
        if (icon_file.isFile() && icon_file.exists()) {
@@ -67,7 +67,7 @@ void HomescreenHandler::init(int port, const char *token)
            icon_path = "./images/Utility_Logo_Grey-01.svg";
        }
 
-       emit showNotification(QString(QLatin1String(application_id)), icon_path, QString(QLatin1String(text)));
+       emit showNotification(QString(QLatin1String(app_id)), icon_path, QString(QLatin1String(text)));
     });
 
     mp_hs->set_event_handler(LibHomeScreen::Event_ShowInformation,[this](json_object *object){
