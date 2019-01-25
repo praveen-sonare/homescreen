@@ -62,14 +62,6 @@ Item {
                 name: model.name
                 active: model.name === launcher.current
                 onClicked: {
-                    pid = launcher.launch(model.application)
-                    if (1 < pid) {
-                        applicationArea.visible = true
-                    }
-                    else {
-                        console.warn(model.application)
-                        console.warn("app cannot be launched!")
-                    }
                     homescreenHandler.tapShortcut(model.appid)
                 }
             }
