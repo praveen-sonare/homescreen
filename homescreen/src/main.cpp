@@ -109,13 +109,17 @@ int main(int argc, char *argv[])
     });
 
     layoutHandler->set_event_handler(QLibWindowmanager::Event_ScreenUpdated, [layoutHandler, launcher](json_object *object) {
+        QString eventStr = json_object_get_string(object);
+        HMI_DEBUG("HomeScreen","Event_ScreenUpdated message: %s.", eventStr.toStdString().c_str());
         json_object *jarray = json_object_object_get(object, "ids");
         int arrLen = json_object_array_length(jarray);
         for( int idx = 0; idx < arrLen; idx++)
         {
             QString label = QString(json_object_get_string(	json_object_array_get_idx(jarray, idx) ));
-            HMI_DEBUG("HomeScreen","Event_ScreenUpdated application: %s.", label.toStdString().c_str());
-            QMetaObject::invokeMethod(launcher, "setCurrent", Qt::QueuedConnection, Q_ARG(QString, label));
+            if (label != graphic_role){
+                HMI_DEBUG("HomeScreen","Event_ScreenUpdated application: %s.", label.toStdString().c_str());
+                QMetaObject::invokeMethod(launcher, "setCurrent", Qt::QueuedConnection, Q_ARG(QString, label));
+            }
         }
     });
 
