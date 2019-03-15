@@ -16,7 +16,7 @@
 
 #include <QtCore/QObject>
 #include <QQmlEngine>
-#include "../helpers/qafbwebsocketclient.h"
+#include "../qafbwebsocketclient.h"
 
 class MasterVolume
 	: public QObject

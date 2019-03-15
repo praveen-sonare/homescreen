@@ -1,3 +1,0 @@
-[submodule "homescreen/helpers"]
-	path = homescreen/helpers
-	url =  https://gerrit.automotivelinux.org/gerrit/apps/app-afb-helpers-submodule
