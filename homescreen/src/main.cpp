@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("homescreenHandler", homescreenHandler);
     engine.rootContext()->setContextProperty("launcher", launcher);
     engine.rootContext()->setContextProperty("weather", new Weather(bindingAddress));
-    engine.rootContext()->setContextProperty("bluetooth", new Bluetooth(bindingAddress));
+    engine.rootContext()->setContextProperty("bluetooth", new Bluetooth(bindingAddress, engine.rootContext()));
     engine.rootContext()->setContextProperty("screenInfo", &screenInfo);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
