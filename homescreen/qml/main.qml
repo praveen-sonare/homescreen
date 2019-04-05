@@ -33,7 +33,7 @@ Window {
         anchors.centerIn: parent
         width: 1080
         height: 1920
-        scale: 1.0
+        scale: screenInfo.scale_factor()
         source: './images/AGL_HMI_Blue_Background_NoCar-01.png'
 
         ColumnLayout {

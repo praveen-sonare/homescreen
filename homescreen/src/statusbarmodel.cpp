@@ -17,13 +17,10 @@
 
 #include "statusbarmodel.h"
 #include "statusbarserver.h"
-#include <QDebug>
-#include "hmi-debug.h"
 
 #include <QtDBus/QDBusConnection>
 
 #include "network.h"
-
 
 class StatusBarModel::Private
 {
@@ -68,7 +65,6 @@ StatusBarModel::~StatusBarModel()
 
 void StatusBarModel::init(QUrl &url, QQmlContext *context)
 {
-    HMI_DEBUG("HomeScreen", "StatusBarModel::init");
     d->network = new Network(url, context);
     context->setContextProperty("network", d->network);
 
@@ -81,7 +77,6 @@ void StatusBarModel::init(QUrl &url, QQmlContext *context)
 
 void StatusBarModel::setWifiStatus(bool connected, bool enabled, int strength)
 {
-    HMI_DEBUG("HomeScreen", "StatusBarModel::setWifiStatus");
     if (enabled && connected)
         if (strength < 30)
             d->server.setStatusIcon(0, QStringLiteral("qrc:/images/Status/HMI_Status_Wifi_1Bar-01.png"));
@@ -116,6 +111,7 @@ int StatusBarModel::rowCount(const QModelIndex &parent) const
     if (parent.isValid())
         return 0;
 
+    // Delete bluetooth because use agl-service-bluetooth.
     return StatusBarServer::SupportedCount - 1;
 }
 
@@ -127,9 +123,9 @@ QVariant StatusBarModel::data(const QModelIndex &index, int role) const
 
     switch (role) {
     case Qt::DisplayRole:
-        if (index.row() == 0) {
+        if (index.row() == 0){
             ret = d->iconList[StatusBarServer::StatusWifi];
-        } else if (index.row() == 1) {
+        }else if (index.row() == 1){
             ret = d->iconList[StatusBarServer::StatusCellular];
         }
         break;

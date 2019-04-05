@@ -101,6 +101,8 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    AGLScreenInfo screenInfo(layoutHandler->get_scale_factor());
+
     if (layoutHandler->requestSurface(QString("HomeScreen")) != 0) {
         exit(EXIT_FAILURE);
     }
