@@ -32,7 +32,7 @@ MouseArea {
         Image {
             id: inactiveIcon
             anchors.fill: parent
-                     source: './images/Shortcut/%1.svg'.arg(root.name.toLowerCase())
+            source: './images/Shortcut/%1.svg'.arg(root.name.toLowerCase())
         }
         Image {
             id: activeIcon

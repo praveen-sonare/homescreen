@@ -26,6 +26,7 @@ Window {
     width: container.width * container.scale
     height: container.height * container.scale
     title: 'HomeScreen'
+    color: "#00000000"
 
     Image {
         id: container
@@ -60,97 +61,107 @@ Window {
                 Layout.preferredHeight: 215
             }
         }
-    }
 
-    Timer {
-        id:informationTimer
-        interval: 3000
-        running: false
-        repeat: true
-        onTriggered: {
-            bottomInformation.visible = false
+        state: "normal"
+
+        states: [
+            State {
+                name: "normal"
+                PropertyChanges {
+                    target: topArea
+                    y: 0
+                }
+                PropertyChanges {
+                    target: applicationArea
+                    y: 218
+                }
+                PropertyChanges {
+                    target: mediaArea
+                    y: 1705
+                }
+            },
+            State {
+                name: "fullscreen"
+                PropertyChanges {
+                    target: topArea
+                    y: -220
+                }
+                PropertyChanges {
+                    target: applicationArea
+                    y: -1490
+                }
+                PropertyChanges {
+                    target: mediaArea
+                    y: 2135
+                }
+            }
+        ]
+        transitions: Transition {
+            NumberAnimation {
+                target: topArea
+                property: "y"
+                easing.type: "OutQuad"
+                duration: 250
+            }
+            NumberAnimation {
+                target: mediaArea
+                property: "y"
+                easing.type: "OutQuad"
+                duration: 250
+            }
         }
-    }
 
+    }
     Item {
-        id: bottomInformation
-        width: parent.width
-        height: 215
-        anchors.bottom: parent.bottom
-        visible: false
-        Text {
-            id: bottomText
-            anchors.centerIn: parent
-            font.pixelSize: 25
-            font.letterSpacing: 5
-            horizontalAlignment: Text.AlignHCenter
-            color: "white"
-            text: ""
-            z:1
-        }
-    }
-
-    Connections {
-        target: homescreenHandler
-        onShowInformation: {
-            bottomText.text = info
-            bottomInformation.visible = true
-            informationTimer.restart()
-        }
-    }
-
-	Timer {
-        id:notificationTimer
-        interval: 3000
-        running: false
-        repeat: true
-        onTriggered: notificationItem.visible = false
-    }
-
-    Item {
-        id: notificationItem
-        x: 0
-        y: 0
+        id: switchBtn
+        width: 70
+        height: 70
+        anchors.right: parent.right
+        anchors.top: parent.top
         z: 1
-        width: 1280
-        height: 100
-        opacity: 0.8
-        visible: false
+        property bool enableSwitchBtn: true
+        Image {
+            anchors.right: parent.right
+            anchors.rightMargin: 20
+            anchors.top: parent.top
+            anchors.topMargin: 25
+            width: 35
+            height: 35
+            id: image
+            source: './images/normal.png'
+        }
 
-        Rectangle {
-            width: parent.width
-            height: parent.height
+        MouseArea {
             anchors.fill: parent
-            color: "gray"
-            Image {
-                id: notificationIcon
-                width: 70
-                height: 70
-                anchors.left: parent.left
-                anchors.leftMargin: 20
-                anchors.verticalCenter: parent.verticalCenter
-                source: ""
-            }
-
-            Text {
-                id: notificationtext
-                font.pixelSize: 25
-                anchors.left: notificationIcon.right
-                anchors.leftMargin: 5
-                anchors.verticalCenter: parent.verticalCenter
-                color: "white"
-                text: qsTr("")
+            onClicked: {
+                if(switchBtn.enableSwitchBtn) {
+                    var appName = homescreenHandler.getCurrentApplication()
+                    if (container.state === 'normal') {
+                        image.source = './images/fullscreen.png'
+                        container.state = 'fullscreen'
+                        touchArea.switchArea(1)
+                        homescreenHandler.tapShortcut(appName, true)
+                        container.opacity = 0.0
+                    } else {
+                        image.source = './images/normal.png'
+                        container.state = 'normal'
+                        touchArea.switchArea(0)
+                        homescreenHandler.tapShortcut(appName, false)
+                        container.opacity = 1.0
+                    }
+                }
             }
         }
     }
-
-    Connections {
-        target: homescreenHandler
-        onShowNotification: {
-            notificationIcon.source = icon_path
-            notificationtext.text = text
-            notificationItem.visible = true
-            notificationTimer.restart()
+    function changeSwitchState(is_navigation) {
+        if(container.state === 'normal') {
+            if(is_navigation) {
+                switchBtn.enableSwitchBtn = true
+                image.source = './images/normal.png'
+            } else {
+                switchBtn.enableSwitchBtn = false
+                image.source = './images/normal_disable.png'
+            }
         }
     }
 }

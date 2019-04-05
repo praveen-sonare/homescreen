@@ -23,7 +23,8 @@ void* HomescreenHandler::myThis = 0;
 
 HomescreenHandler::HomescreenHandler(QObject *parent) :
     QObject(parent),
-    mp_hs(NULL)
+    mp_hs(NULL),
+    current_applciation("launcher")
 {
 
 }
@@ -79,15 +80,32 @@ void HomescreenHandler::init(int port, const char *token)
     });
 }
 
-void HomescreenHandler::tapShortcut(QString application_id)
+void HomescreenHandler::tapShortcut(QString application_id, bool is_full)
 {
     HMI_DEBUG("HomeScreen","tapShortcut %s", application_id.toStdString().c_str());
     struct json_object* j_json = json_object_new_object();
     struct json_object* value;
-    value = json_object_new_string("normal");
+    if(is_full) {
+        value = json_object_new_string("fullscreen");
+        HMI_DEBUG("HomeScreen","fullscreen");
+    } else {
+        value = json_object_new_string("normal");
+        HMI_DEBUG("HomeScreen","normal");
+    }
     json_object_object_add(j_json, "area", value);
-
     mp_hs->showWindow(application_id.toStdString().c_str(), j_json);
+}
+
+void HomescreenHandler::setCurrentApplication(QString application_name)
+{
+    HMI_DEBUG("HomeScreen","setCurrentApplication %s", application_name.toStdString().c_str());
+    current_applciation = application_name;
+}
+
+QString HomescreenHandler::getCurrentApplication()
+{
+    HMI_DEBUG("HomeScreen","getCurrentApplication %s", current_applciation.toStdString().c_str());
+    return current_applciation;
 }
 
 void HomescreenHandler::onRep_static(struct json_object* reply_contents)

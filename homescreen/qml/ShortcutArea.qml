@@ -24,6 +24,13 @@ Item {
     width: 785
     height: 218
 
+    Timer {
+        id:notificationTimer
+        interval: 3000
+        running: false
+        repeat: true
+        onTriggered: notificationItem.visible = false
+    }
 
     ListModel {
         id: applicationModel
@@ -33,18 +40,18 @@ Item {
             application: 'launcher@0.1'
         }
         ListElement {
-            appid: 'mediaplayer'
-            name: 'MediaPlayer'
-            application: 'mediaplayer@0.1'
+            appid: 'sdl_usb'
+            name: 'sdl_usb'
+            application: 'sdl_usb@5.0'
         }
         ListElement {
-            appid: 'hvac'
-            name: 'HVAC'
-            application: 'hvac@0.1'
+            appid: 'video'
+            name: 'Video'
+            application: 'video@0.1'
         }
         ListElement {
             appid: 'navigation'
-            name: 'Navigation'
+            name: 'navigation'
             application: 'navigation@0.1'
         }
     }

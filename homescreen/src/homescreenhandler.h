@@ -32,7 +32,9 @@ public:
 
     void init(int port, const char* token);
 
-    Q_INVOKABLE void tapShortcut(QString application_id);
+    Q_INVOKABLE void tapShortcut(QString application_id, bool is_full);
+    Q_INVOKABLE QString getCurrentApplication();
+    void setCurrentApplication(QString application_name);
 
     void onRep(struct json_object* reply_contents);
     void onEv(const string& event, struct json_object* event_contents);
@@ -46,6 +48,7 @@ signals:
     void showInformation(QString info);
 private:
     LibHomeScreen *mp_hs;
+    QString current_applciation;
 };
 
 #endif // HOMESCREENHANDLER_H

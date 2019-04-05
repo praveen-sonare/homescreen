@@ -31,6 +31,7 @@ SOURCES += \
     src/applicationlauncher.cpp \
     src/mastervolume.cpp \
     src/homescreenhandler.cpp \
+    src/toucharea.cpp \
     helpers/qafbwebsocketclient.cpp
 
 HEADERS  += \
@@ -39,6 +40,7 @@ HEADERS  += \
     src/applicationlauncher.h \
     src/mastervolume.h \
     src/homescreenhandler.h \
+    src/toucharea.h \
     helpers/qafbwebsocketclient.h
 
 OTHER_FILES += \

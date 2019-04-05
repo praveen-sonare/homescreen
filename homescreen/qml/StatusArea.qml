@@ -117,11 +117,15 @@ Item {
             Layout.fillHeight: true
             Layout.preferredWidth: 76
             spacing: -10
-
+            Rectangle {
+                Layout.preferredWidth: 77
+                Layout.preferredHeight: 55
+                opacity: 0
+            }
             Image {
                 id: bt_icon
                 Layout.preferredWidth: 77
-                Layout.preferredHeight: 73
+                Layout.preferredHeight: 55
                 source: connStatus ? './images/Status/HMI_Status_Bluetooth_On-01.png' : './images/Status/HMI_Status_Bluetooth_Inactive-01.png'
                 fillMode: Image.PreserveAspectFit
                 property string deviceName: "none"
@@ -134,11 +138,12 @@ Item {
                     }
                 }
             }
+
             Repeater {
                 model: StatusBarModel { objectName: "statusBar" }
                 delegate: Image {
                     Layout.preferredWidth: 77
-                    Layout.preferredHeight: 73
+                    Layout.preferredHeight: 55
                     source: model.modelData
                     fillMode: Image.PreserveAspectFit
                 }
