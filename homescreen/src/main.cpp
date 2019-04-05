@@ -110,26 +110,6 @@ int main(int argc, char *argv[])
         layoutHandler->endDraw(graphic_role);
     });
 
-    layoutHandler->set_event_handler(QLibWindowmanager::Event_ScreenUpdated, [layoutHandler, launcher, homescreenHandler, root](json_object *object) {
-        json_object *jarray = json_object_object_get(object, "ids");
-        HMI_DEBUG("HomeScreen","ids=%s", json_object_to_json_string(object));
-        int arrLen = json_object_array_length(jarray);
-        QString label = QString("");
-        for( int idx = 0; idx < arrLen; idx++)
-        {
-            label = QString(json_object_get_string(	json_object_array_get_idx(jarray, idx) ));
-            HMI_DEBUG("HomeScreen","Event_ScreenUpdated application: %s.", label.toStdString().c_str());
-            homescreenHandler->setCurrentApplication(label);
-            QMetaObject::invokeMethod(launcher, "setCurrent", Qt::QueuedConnection, Q_ARG(QString, label));
-        }
-        if((arrLen == 1) && (QString("navigation") == label)){
-            QMetaObject::invokeMethod(root, "changeSwitchState", Q_ARG(QVariant, true));
-        }else{
-            QMetaObject::invokeMethod(root, "changeSwitchState", Q_ARG(QVariant, false));
-        }
-
-    });
-
     HomescreenHandler* homescreenHandler = new HomescreenHandler();
     homescreenHandler->init(port, token.toStdString().c_str());
 
@@ -159,6 +139,26 @@ int main(int argc, char *argv[])
 
     QObject *root = engine.rootObjects().first();
     QQuickWindow *window = qobject_cast<QQuickWindow *>(root);
+
+        layoutHandler->set_event_handler(QLibWindowmanager::Event_ScreenUpdated, [layoutHandler, launcher, homescreenHandler, root](json_object *object) {
+        json_object *jarray = json_object_object_get(object, "ids");
+        HMI_DEBUG("HomeScreen","ids=%s", json_object_to_json_string(object));
+        int arrLen = json_object_array_length(jarray);
+        QString label = QString("");
+        for( int idx = 0; idx < arrLen; idx++)
+        {
+            label = QString(json_object_get_string(	json_object_array_get_idx(jarray, idx) ));
+            HMI_DEBUG("HomeScreen","Event_ScreenUpdated application: %s.", label.toStdString().c_str());
+            homescreenHandler->setCurrentApplication(label);
+            QMetaObject::invokeMethod(launcher, "setCurrent", Qt::QueuedConnection, Q_ARG(QString, label));
+        }
+        if((arrLen == 1) && (QString("navigation") == label)){
+            QMetaObject::invokeMethod(root, "changeSwitchState", Q_ARG(QVariant, true));
+        }else{
+            QMetaObject::invokeMethod(root, "changeSwitchState", Q_ARG(QVariant, false));
+        }
+
+    });
 
     touchArea->setWindow(window);
     QThread* thread = new QThread;

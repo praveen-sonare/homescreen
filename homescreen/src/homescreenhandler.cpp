@@ -50,34 +50,6 @@ void HomescreenHandler::init(int port, const char *token)
             json_object_object_get(object, "display_message"));
         HMI_DEBUG("HomeScreen","set_event_handler Event_OnScreenMessage display_message = %s", display_message);
     });
-
-    mp_hs->set_event_handler(LibHomeScreen::Event_ShowNotification,[this](json_object *object){
-       const char *application_id = json_object_get_string(
-                   json_object_object_get(object, "application_id"));
-
-       json_object *p_obj = json_object_object_get(object, "parameter");
-       const char *icon = json_object_get_string(
-                   json_object_object_get(p_obj, "icon"));
-       const char *text = json_object_get_string(
-                   json_object_object_get(p_obj, "text"));
-       QFileInfo icon_file(icon);
-       QString icon_path;
-       if (icon_file.isFile() && icon_file.exists()) {
-           icon_path = QString(QLatin1String(icon));
-       } else {
-           icon_path = "./images/Utility_Logo_Grey-01.svg";
-       }
-
-       emit showNotification(QString(QLatin1String(application_id)), icon_path, QString(QLatin1String(text)));
-    });
-
-    mp_hs->set_event_handler(LibHomeScreen::Event_ShowInformation,[this](json_object *object){
-       json_object *p_obj = json_object_object_get(object, "parameter");
-       const char *info = json_object_get_string(
-                   json_object_object_get(p_obj, "info"));
-
-       emit showInformation(QString(QLatin1String(info)));
-    });
 }
 
 void HomescreenHandler::tapShortcut(QString application_id, bool is_full)
