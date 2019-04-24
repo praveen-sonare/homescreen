@@ -16,7 +16,6 @@
   </feature>
   <feature name="urn:AGL:widget:required-permission">
     <param name="urn:AGL:permission::public:no-htdocs" value="required" />
-    <param name="urn:AGL:permission::system:run-by-default" value="required" />
     <param name="http://tizen.org/privilege/internal/dbus" value="required" />
     <param name="urn:AGL:permission::public:4a-audio-mixer" value="required" />
   </feature>
