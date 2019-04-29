@@ -99,7 +99,7 @@ Window {
         }
     }
 
-	Timer {
+    Timer {
         id:notificationTimer
         interval: 3000
         running: false

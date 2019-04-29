@@ -13,6 +13,7 @@
     <param name="Bluetooth-Manager" value="ws" />
     <param name="windowmanager" value="ws" />
     <param name="audiomixer" value="ws" />
+    <param name="vshl-core" value="ws" />
   </feature>
   <feature name="urn:AGL:widget:required-permission">
     <param name="urn:AGL:permission::public:no-htdocs" value="required" />

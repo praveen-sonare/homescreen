@@ -30,14 +30,19 @@ SOURCES += \
     src/statusbarserver.cpp \
     src/applicationlauncher.cpp \
     src/mastervolume.cpp \
-    src/homescreenhandler.cpp
+    src/homescreenhandler.cpp \
+    src/aglsocketwrapper.cpp \
+    src/chromecontroller.cpp
 
 HEADERS  += \
     src/statusbarmodel.h \
     src/statusbarserver.h \
     src/applicationlauncher.h \
     src/mastervolume.h \
-    src/homescreenhandler.h
+    src/homescreenhandler.h \
+    src/aglsocketwrapper.h \
+    src/chromecontroller.h \
+    src/constants.h
 
 OTHER_FILES += \
     README.md
@@ -49,4 +54,5 @@ RESOURCES += \
     qml/images/Shortcut/shortcut.qrc \
     qml/images/Status/status.qrc \
     qml/images/images.qrc \
-    qml/qml.qrc
+    qml/qml.qrc \
+    qml/images/SpeechChrome/speechchrome.qrc
