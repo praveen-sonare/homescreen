@@ -90,6 +90,13 @@ Window {
         }
     }
 
+    SpeechChrome {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        height: 215
+    }
+
     Connections {
         target: homescreenHandler
         onShowInformation: {

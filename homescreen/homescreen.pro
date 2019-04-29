@@ -31,7 +31,9 @@ SOURCES += \
     src/applicationlauncher.cpp \
     src/mastervolume.cpp \
     src/homescreenhandler.cpp \
-    helpers/qafbwebsocketclient.cpp
+    helpers/qafbwebsocketclient.cpp \
+    src/aglsocketwrapper.cpp \
+    src/chromecontroller.cpp
 
 HEADERS  += \
     src/statusbarmodel.h \
@@ -39,7 +41,10 @@ HEADERS  += \
     src/applicationlauncher.h \
     src/mastervolume.h \
     src/homescreenhandler.h \
-    helpers/qafbwebsocketclient.h
+    helpers/qafbwebsocketclient.h \
+    src/aglsocketwrapper.h \
+    src/chromecontroller.h \
+    src/constants.h
 
 OTHER_FILES += \
     README.md
@@ -51,4 +56,5 @@ RESOURCES += \
     qml/images/Shortcut/shortcut.qrc \
     qml/images/Status/status.qrc \
     qml/images/images.qrc \
-    qml/qml.qrc
+    qml/qml.qrc \
+    qml/images/SpeechChrome/speechchrome.qrc

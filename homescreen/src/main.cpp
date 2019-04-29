@@ -32,6 +32,7 @@
 #include "mastervolume.h"
 #include "homescreenhandler.h"
 #include "hmi-debug.h"
+#include "chromecontroller.h"
 
 // XXX: We want this DBus connection to be shared across the different
 // QML objects, is there another way to do this, a nice way, perhaps?
@@ -91,6 +92,8 @@ int main(int argc, char *argv[])
     // qmlRegisterType<ApplicationLauncher>("HomeScreen", 1, 0, "ApplicationLauncher");
     qmlRegisterType<StatusBarModel>("HomeScreen", 1, 0, "StatusBarModel");
     qmlRegisterType<MasterVolume>("MasterVolume", 1, 0, "MasterVolume");
+    qmlRegisterUncreatableType<ChromeController>("SpeechChrome", 1, 0, "SpeechChromeController",
+                                                 QLatin1String("SpeechChromeController is uncreatable."));
 
     ApplicationLauncher *launcher = new ApplicationLauncher();
     QLibWindowmanager* layoutHandler = new QLibWindowmanager();
@@ -140,6 +143,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("launcher", launcher);
     engine.rootContext()->setContextProperty("weather", new Weather(bindingAddress));
     engine.rootContext()->setContextProperty("bluetooth", new Bluetooth(bindingAddress, engine.rootContext()));
+    engine.rootContext()->setContextProperty("speechChromeController", new ChromeController(bindingAddress, &engine));
     engine.rootContext()->setContextProperty("screenInfo", &screenInfo);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
