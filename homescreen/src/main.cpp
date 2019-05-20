@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     });
 
     HomescreenHandler* homescreenHandler = new HomescreenHandler();
-    homescreenHandler->init(port, token.toStdString().c_str());
+    homescreenHandler->init(port, token.toStdString().c_str(), layoutHandler, graphic_role);
 
     QUrl bindingAddress;
     bindingAddress.setScheme(QStringLiteral("ws"));
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 
     QObject *root = engine.rootObjects().first();
     QQuickWindow *window = qobject_cast<QQuickWindow *>(root);
-    QObject::connect(window, SIGNAL(frameSwapped()), layoutHandler, SLOT(slotActivateSurface()));
+    homescreenHandler->setQuickWindow(window);
 
     QList<QObject *> sobjs = engine.rootObjects();
     StatusBarModel *statusBar = sobjs.first()->findChild<StatusBarModel *>("statusBar");

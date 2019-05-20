@@ -18,7 +18,9 @@
 #define HOMESCREENHANDLER_H
 
 #include <QObject>
-#include <libhomescreen.hpp>
+#include <QQuickWindow>
+#include <qlibhomescreen.h>
+#include <qlibwindowmanager.h>
 #include <string>
 
 using namespace std;
@@ -30,7 +32,7 @@ public:
     explicit HomescreenHandler(QObject *parent = 0);
     ~HomescreenHandler();
 
-    void init(int port, const char* token);
+    void init(int port, const char* token, QLibWindowmanager *qwm, QString myname);
 
     Q_INVOKABLE void tapShortcut(QString application_id);
 
@@ -40,12 +42,15 @@ public:
     static void* myThis;
     static void onRep_static(struct json_object* reply_contents);
     static void onEv_static(const string& event, struct json_object* event_contents);
+    void setQuickWindow(QQuickWindow *qw);
 
 signals:
     void showNotification(QString application_id, QString icon_path, QString text);
     void showInformation(QString info);
 private:
-    LibHomeScreen *mp_hs;
+    QLibHomeScreen *mp_qhs;
+    QLibWindowmanager *mp_qwm;
+    QString m_myname;
 };
 
 #endif // HOMESCREENHANDLER_H
