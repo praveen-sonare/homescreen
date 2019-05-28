@@ -52,8 +52,14 @@ void HomescreenHandler::init(int port, const char *token, QLibWindowmanager *qwm
 
     mp_qhs->set_event_handler(QLibHomeScreen::Event_ShowWindow,[this](json_object *object){
         HMI_DEBUG("Launcher","Surface launcher got Event_ShowWindow\n");
-        mp_qwm->activateWindow(m_myname);
-	emit showWindow();
+        static bool first_start = true;
+        if (first_start) {
+            first_start = false;
+            mp_qwm->activateWindow(m_myname);
+        }
+        else {
+            emit showWindow();
+        }
     });
 
     mp_qhs->set_event_handler(QLibHomeScreen::Event_OnScreenMessage, [this](json_object *object){
