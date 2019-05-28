@@ -34,7 +34,12 @@ public:
 
     void init(int port, const char* token, QLibWindowmanager *qwm, QString myname);
 
-    Q_INVOKABLE void tapShortcut(QString application_id);
+    Q_INVOKABLE void tapShortcut(QString application_name, bool is_full);
+    Q_INVOKABLE QString getCurrentApplication();
+    Q_INVOKABLE void killRunningApplications();
+    Q_INVOKABLE void reboot();
+    void setCurrentApplication(QString application_name);
+    int getPidOfApplication(QString application_name);
 
     void onRep(struct json_object* reply_contents);
     void onEv(const string& event, struct json_object* event_contents);
@@ -47,10 +52,18 @@ public:
 signals:
     void showNotification(QString application_id, QString icon_path, QString text);
     void showInformation(QString info);
+    void shortcutChanged(QString shortcut_id, QString shortcut_name, QString position);
+    void showWindow();
+    void hideWindow();
+
+public slots:
+    void updateShortcut(QString id, struct json_object* object);
+
 private:
     QLibHomeScreen *mp_qhs;
     QLibWindowmanager *mp_qwm;
     QString m_myname;
+    QString current_application;
 };
 
 #endif // HOMESCREENHANDLER_H

@@ -8,5 +8,11 @@
         <file>mediaplayer_active.svg</file>
         <file>navigation.svg</file>
         <file>navigation_active.svg</file>
+        <file>video.svg</file>
+        <file>video_active.svg</file>
+        <file>sdl_usb.svg</file>
+        <file>sdl_usb_active.svg</file>
+        <file>blank.svg</file>
+        <file>blank_active.svg</file>
     </qresource>
 </RCC>

@@ -81,5 +81,6 @@ void ApplicationLauncher::setCurrent(const QString &current)
 {
     if (m_current == current) return;
     m_current = current;
+    qDebug() << "setCurrent" << m_current;
     emit currentChanged(current);
 }

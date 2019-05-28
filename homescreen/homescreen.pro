@@ -28,14 +28,18 @@ SOURCES += \
     src/statusbarserver.cpp \
     src/applicationlauncher.cpp \
     src/mastervolume.cpp \
-    src/homescreenhandler.cpp
+    src/homescreenhandler.cpp \
+    src/toucharea.cpp \
+    src/shortcutappmodel.cpp
 
 HEADERS  += \
     src/statusbarmodel.h \
     src/statusbarserver.h \
     src/applicationlauncher.h \
     src/mastervolume.h \
-    src/homescreenhandler.h
+    src/homescreenhandler.h \
+    src/toucharea.h \
+    src/shortcutappmodel.h
 
 OTHER_FILES += \
     README.md

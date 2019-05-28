@@ -24,7 +24,10 @@ MouseArea {
     width: 195
     height: 216.8
     property string name: 'Home'
+    property string icon:'./images/Shortcut/'
     property bool active: false
+    property bool isBlank: false
+
     Item {
         id: icon
         property real desaturation: 0
@@ -32,14 +35,42 @@ MouseArea {
         Image {
             id: inactiveIcon
             anchors.fill: parent
-                     source: './images/Shortcut/%1.svg'.arg(root.name.toLowerCase())
+            source: './images/Shortcut/blank.svg'
+//            source: isBlank ? './images/Shortcut/blank.svg' : root.icon
+            property string initial: root.name.substring(0,1).toUpperCase()
+            Label {
+                style: Text.Outline
+                styleColor: '#00FFFF'
+                color: 'transparent'
+                font.pixelSize: 75
+                anchors.centerIn: parent
+                text: inactiveIcon.initial
+                visible: root.isBlank
+            }
         }
         Image {
             id: activeIcon
             anchors.fill: parent
-            source: './images/Shortcut/%1_active.svg'.arg(root.name.toLowerCase())
+            source: './images/Shortcut/blank_active.svg'
+//            source: isBlank ? './images/Shortcut/blank_active.svg' : root.icon
+            property string initial: root.name.substring(0,1).toUpperCase()
+            Label {
+                style: Text.Outline
+                styleColor: '#00FFFF'
+                color: 'transparent'
+                font.pixelSize: 75
+                anchors.centerIn: parent
+                text: activeIcon.initial
+                visible: root.isBlank
+            }
             opacity: 0.0
         }
+        Image {
+            id: sourceIcon
+            anchors.fill: parent
+            source: isBlank ? null : root.icon
+        }
+
         layer.enabled: true
         layer.effect: Desaturate {
             id: desaturate
@@ -47,6 +78,7 @@ MouseArea {
             cached: true
         }
     }
+
     Label {
         id: name
         y: 160
@@ -57,20 +89,10 @@ MouseArea {
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
         color: "white"
-        text: qsTr(model.name.toUpperCase())
+        text: qsTr((root.name === "launcher" ? "home" : root.name).toUpperCase())
     }
+
     states: [
-        State {
-            when: launcher.launching
-            PropertyChanges {
-                target: root
-                enabled: false
-            }
-            PropertyChanges {
-                target: icon
-                desaturation: 1.0
-            }
-        },
         State {
             when: root.active
             PropertyChanges {
@@ -80,20 +102,6 @@ MouseArea {
             PropertyChanges {
                 target: activeIcon
                 opacity: 1.0
-            }
-        }
-    ]
-
-    transitions: [
-        Transition {
-            NumberAnimation {
-                properties: 'opacity'
-                duration: 500
-                easing.type: Easing.OutExpo
-            }
-            NumberAnimation {
-                properties: 'desaturation'
-                duration: 250
             }
         }
     ]

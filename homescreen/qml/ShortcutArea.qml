@@ -24,46 +24,40 @@ Item {
     width: 785
     height: 218
 
-
-    ListModel {
-        id: applicationModel
-        ListElement {
-            appid: 'launcher'
-            name: 'launcher'
-            application: 'launcher@0.1'
-        }
-        ListElement {
-            appid: 'mediaplayer'
-            name: 'MediaPlayer'
-            application: 'mediaplayer@0.1'
-        }
-        ListElement {
-            appid: 'hvac'
-            name: 'HVAC'
-            application: 'hvac@0.1'
-        }
-        ListElement {
-            appid: 'navigation'
-            name: 'Navigation'
-            application: 'navigation@0.1'
-        }
-    }
-
     property int pid: -1
 
     RowLayout {
         anchors.fill: parent
         spacing: 2
         Repeater {
-            model: applicationModel
+            id: repeater
+            model: shortcutAppModel
             delegate: ShortcutIcon {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                name: model.name
-                active: model.name === launcher.current
+                name: shortcutAppModel.getName(model.index)
+                icon: shortcutAppModel.getIcon(model.index)
+                isBlank: shortcutAppModel.isBlank(model.index)
+                active: shortcutAppModel.getName(model.index).toLowerCase() === launcher.current
                 onClicked: {
-                    homescreenHandler.tapShortcut(model.appid)
+		    console.log("launcher.current====="+homescreenHandler.getCurrentApplication())
+                    if(launcher.current === shortcutAppModel.getName(model.index)) {
+                        return
+                    }                    
+		    homescreenHandler.tapShortcut(shortcutAppModel.getId(model.index), false)
                 }
+            }
+        }
+    }
+
+    Connections {
+        target: shortcutAppModel
+        onUpdateShortcut: {
+            for(var i = 0; i < 4; i++) {
+                var item = repeater.itemAt(i)
+                item.name = shortcutAppModel.getName(i)
+                item.icon = shortcutAppModel.getIcon(i)
+                item.isBlank = shortcutAppModel.isBlank(i)
             }
         }
     }

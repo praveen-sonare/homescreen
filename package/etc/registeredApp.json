@@ -1,0 +1,18 @@
+{
+	"1st shortcut key": {
+		"id": "launcher@0.1",
+		"name": "launcher"
+	},
+	"2nd shortcut key": {
+		"id": "sdl_usb@5.0",
+		"name": "sdl_usb"
+	},
+	"3rd shortcut key": {
+		"id": "video@0.1",
+		"name": "video"
+	},
+	"4th shortcut key": {
+		"id": "navigation@0.1",
+		"name": "navigation"
+	}
+}
