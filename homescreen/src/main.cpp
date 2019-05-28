@@ -25,7 +25,7 @@
 #include <QThread>
 
 #include <weather.h>
-#include <bluetooth.h>
+//#include <bluetooth.h>
 #include "applicationlauncher.h"
 #include "statusbarmodel.h"
 #include "afm_user_daemon_proxy.h"
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("touchArea", touchArea);
     engine.rootContext()->setContextProperty("launcher", launcher);
     engine.rootContext()->setContextProperty("weather", new Weather(bindingAddress));
-    engine.rootContext()->setContextProperty("bluetooth", new Bluetooth(bindingAddress));
+//    engine.rootContext()->setContextProperty("bluetooth", new Bluetooth(bindingAddress));
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
     QObject *root = engine.rootObjects().first();
