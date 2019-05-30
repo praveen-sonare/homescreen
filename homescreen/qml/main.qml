@@ -31,69 +31,78 @@ Window {
     Image {
         id: container
         anchors.centerIn: parent
-        width: 1080
-        height: 1920
-        scale: screenInfo.scale_factor()
-        source: './images/AGL_HMI_Blue_Background_NoCar-01.png'
+        width: 1920
+        height: 720
+        scale: 1.0
+        source: './images/menubar_background.png'
 
         ColumnLayout {
+            id: menuBar
             anchors.fill: parent
             spacing: 0
             TopArea {
                 id: topArea
-                Layout.fillWidth: true
-                Layout.preferredHeight: 218
+                anchors.horizontalCenter: parent.horizontalCenter
+                Layout.preferredHeight: 80
+                x: 640
             }
 
             Item {
                 id: applicationArea
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.preferredHeight: 1920 - 218 - 215
+                Layout.preferredHeight: 510
 
                 visible: true
+                MouseArea {
+                    enabled: true
+                }
             }
 
-            MediaArea {
-                id: mediaArea
-                Layout.fillWidth: true
+            ShortcutArea {
+                id: shortcutArea
+                anchors.horizontalCenter: parent.horizontalCenter
                 Layout.fillHeight: true
-                Layout.preferredHeight: 215
+                Layout.preferredHeight: 130
             }
         }
-
-
-        state: "normal"
-
         states: [
             State {
                 name: "normal"
+                PropertyChanges {
+                    target: container
+                    y: 0
+                }
                 PropertyChanges {
                     target: topArea
                     y: 0
                 }
                 PropertyChanges {
                     target: applicationArea
-                    y: 218
+                    y: 80
                 }
                 PropertyChanges {
-                    target: mediaArea
-                    y: 1705
+                    target: shortcutArea
+                    y: 590
                 }
             },
             State {
                 name: "fullscreen"
                 PropertyChanges {
+                    target: container
+                    y: -720
+                }
+                PropertyChanges {
                     target: topArea
-                    y: -220
+                    y: -80
                 }
                 PropertyChanges {
                     target: applicationArea
-                    y: -1490
+                    y: -510
                 }
                 PropertyChanges {
-                    target: mediaArea
-                    y: 2135
+                    target: shortcutArea
+                    y: 720
                 }
             }
         ]
@@ -105,50 +114,79 @@ Window {
                 duration: 250
             }
             NumberAnimation {
-                target: mediaArea
+                target: applicationArea
+                property: "y"
+                easing.type: "OutQuad"
+                duration: 250
+            }
+            NumberAnimation {
+                target: shortcutArea
                 property: "y"
                 easing.type: "OutQuad"
                 duration: 250
             }
         }
-
     }
+
     Item {
         id: switchBtn
-        width: 70
-        height: 70
+        width: 61
+        height: 61
         anchors.right: parent.right
+        anchors.rightMargin: 17
         anchors.top: parent.top
+        anchors.topMargin: 2
         z: 1
-        property bool enableSwitchBtn: true
         Image {
-            anchors.right: parent.right
-            anchors.rightMargin: 20
-            anchors.top: parent.top
-            anchors.topMargin: 25
-            width: 35
-            height: 35
             id: image
+            width: 55
+            height: 55
+            anchors.centerIn: parent
             source: './images/normal.png'
         }
 
         MouseArea {
             anchors.fill: parent
+            property string btnState: 'normal'
             onClicked: {
-                if(switchBtn.enableSwitchBtn) {
-                    var appName = homescreenHandler.getCurrentApplication()
-                    if (container.state === 'normal') {
-                        image.source = './images/fullscreen.png'
-                        container.state = 'fullscreen'
-                        touchArea.switchArea(1)
-                        homescreenHandler.tapShortcut(appName, true)
-                        container.opacity = 0.0
-                    } else {
-                        image.source = './images/normal.png'
-                        container.state = 'normal'
-                        touchArea.switchArea(0)
-                        homescreenHandler.tapShortcut(appName, false)
-                        container.opacity = 1.0
+                if (container.state === 'normal') {
+                    turnToFullscreen()
+                } else {
+                    turnToNormal()
+                }
+            }
+        }
+    }
+
+    Item {
+        id: splitSwitchBtn
+        width: 61
+        height: 61
+        anchors.right: switchBtn.left
+        anchors.top: parent.top
+        anchors.topMargin: 2
+        z: 1
+        property bool enableSplitSwitchBtn: false
+        Image {
+            id: splitSwitchImage
+            width: 55
+            height: 55
+            anchors.centerIn: parent
+            source: './images/split_switch_disable.png'
+        }
+
+        MouseArea {
+            property bool changed : false
+            anchors.fill: parent
+            onClicked: {
+                if (splitSwitchBtn.enableSplitSwitchBtn) {
+                    if(changed) {
+                        switchSplitArea(0)
+                        changed = false
+                    }
+                    else {
+                        switchSplitArea(1)
+                        changed = true
                     }
                 }
             }
@@ -170,127 +208,32 @@ Window {
         }
     }
 
-    function changeSwitchState(is_navigation) {
-        if(container.state === 'normal') {
-            if(is_navigation) {
-                switchBtn.enableSwitchBtn = true
-                image.source = './images/normal.png'
-            } else {
-                switchBtn.enableSwitchBtn = false
-                image.source = './images/normal_disable.png'
-            }
-        }
+
+    function turnToFullscreen() {
+        image.source = './images/fullscreen.png'
+        container.state = 'fullscreen'
+        container.opacity = 0.0
+        touchArea.switchArea(1)
     }
 
-    Connections {
-        target: homescreenHandler
-        onShowWindow: {
-            container.state = 'normal'
-            image.visible = true
-            touchArea.switchArea(0)
-            container.opacity = 1.0
-        }
+    function turnToNormal() {
+        image.source = './images/normal.png'
+        container.state = 'normal'
+        container.opacity = 1.0
+        touchArea.switchArea(0)
     }
 
-    Connections {
-        target: homescreenHandler
-        onHideWindow: {
-            container.state = 'fullscreen'
-            image.visible = false
-            touchArea.switchArea(1)
-            container.opacity = 0.0
-        }
+    function enableSplitSwitchBtn() {
+        splitSwitchImage.source = './images/split_switch.png'
+        splitSwitchBtn.enableSplitSwitchBtn = true
     }
 
-    Timer {
-        id:informationTimer
-        interval: 3000
-        running: false
-        repeat: true
-        onTriggered: {
-            bottomInformation.visible = false
-        }
+    function disableSplitSwitchBtn() {
+        splitSwitchImage.source = './images/split_switch_disable.png'
+        splitSwitchBtn.enableSplitSwitchBtn = false;
     }
 
-    Item {
-        id: bottomInformation
-        width: parent.width
-        height: 215
-        anchors.bottom: parent.bottom
-        visible: false
-        Text {
-            id: bottomText
-            anchors.centerIn: parent
-            font.pixelSize: 25
-            font.letterSpacing: 5
-            horizontalAlignment: Text.AlignHCenter
-            color: "white"
-            text: ""
-            z:1
-        }
-    }
-
-    Connections {
-        target: homescreenHandler
-        onShowInformation: {
-            bottomText.text = info
-            bottomInformation.visible = true
-            informationTimer.restart()
-        }
-    }
-
-	Timer {
-        id:notificationTimer
-        interval: 3000
-        running: false
-        repeat: true
-        onTriggered: notificationItem.visible = false
-    }
-
-    Item {
-        id: notificationItem
-        x: 0
-        y: 0
-        z: 1
-        width: 1280
-        height: 100
-        opacity: 0.8
-        visible: false
-
-        Rectangle {
-            width: parent.width
-            height: parent.height
-            anchors.fill: parent
-            color: "gray"
-            Image {
-                id: notificationIcon
-                width: 70
-                height: 70
-                anchors.left: parent.left
-                anchors.leftMargin: 20
-                anchors.verticalCenter: parent.verticalCenter
-                source: ""
-            }
-
-            Text {
-                id: notificationtext
-                font.pixelSize: 25
-                anchors.left: notificationIcon.right
-                anchors.leftMargin: 5
-                anchors.verticalCenter: parent.verticalCenter
-                color: "white"
-                text: qsTr("")
-            }
-        }
-    }
-
-    Connections {
-        target: homescreenHandler
-        onShowNotification: {
-            notificationIcon.source = icon_path
-            notificationtext.text = text
-            notificationItem.visible = true
-            notificationTimer.restart()
-        }
+    function switchSplitArea(val) {
+        homescreenHandler.changeLayout(val);
     }
 }

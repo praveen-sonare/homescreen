@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2016 The Qt Company Ltd.
  * Copyright (C) 2016, 2017 Mentor Graphics Development (Deutschland) GmbH
- * Copyright (c) 2017, 2018, 2019 TOYOTA MOTOR CORPORATION
+ * Copyright (c) 2017 TOYOTA MOTOR CORPORATION
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,44 +21,108 @@ import QtQuick.Layouts 1.1
 
 Item {
     id: root
-    width: 785
-    height: 218
+    width: 700
+    height: 110
+
+    Timer {
+        id:informationTimer
+        interval: 3000
+        running: false
+        repeat: true
+        onTriggered: {
+            bottomInformation.visible = false
+        }
+    }
+
+
+    ListModel {
+        id: applicationModel
+        ListElement {
+            name: 'launcher'
+            application: 'launcher@0.1'
+        }
+        ListElement {
+            name: 'MediaPlayer'
+            application: 'mediaplayer@0.1'
+        }
+        ListElement {
+            name: 'navigation'
+            application: 'navigation@0.1'
+        }
+        ListElement {
+            name: 'Phone'
+            application: 'phone@0.1'
+        }
+        ListElement {
+            name: 'settings'
+            application: 'settings@0.1'
+        }
+    }
 
     property int pid: -1
 
     RowLayout {
         anchors.fill: parent
-        spacing: 2
+        spacing: 75
         Repeater {
-            id: repeater
-            model: shortcutAppModel
+            model: applicationModel
             delegate: ShortcutIcon {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                name: shortcutAppModel.getName(model.index)
-                icon: shortcutAppModel.getIcon(model.index)
-                isBlank: shortcutAppModel.isBlank(model.index)
-                active: shortcutAppModel.getName(model.index).toLowerCase() === launcher.current
+//                Layout.fillWidth: true
+//                Layout.fillHeight: true
+                width: 60
+                height: 60
+                name: model.name
+                active: model.name === launcher.current
                 onClicked: {
-		    console.log("launcher.current====="+homescreenHandler.getCurrentApplication())
-                    if(launcher.current === shortcutAppModel.getName(model.index)) {
-                        return
-                    }                    
-		    homescreenHandler.tapShortcut(shortcutAppModel.getId(model.index), false)
+//                    if(model.application === 'navigation@0.1') {
+//                        pid = launcher.launch('browser@5.0')
+//                    } else {
+//                        pid = launcher.launch(model.application.toLowerCase())
+//                    }
+
+//                    if (1 < pid) {
+                        applicationArea.visible = true
+//                    }
+//                    else {
+//                        console.warn(model.application)
+//                        console.warn("app cannot be launched!")
+//                    }
+                    if(model.name === 'Navigation') {
+                        homescreenHandler.tapShortcut('browser')
+                    } else {
+                        homescreenHandler.tapShortcut(model.name)
+                    }
                 }
             }
         }
     }
+    Rectangle {
+        id: bottomInformation
+        width: parent.width
+        height: parent.height-20
+        anchors.bottom: parent.bottom
+        color: "gray"
+        z: 1
+        opacity: 0.8
+        visible: false
+
+        Text {
+            id: informationText
+            anchors.centerIn: parent
+            font.pixelSize: 25
+            font.letterSpacing: 5
+            horizontalAlignment: Text.AlignHCenter
+            color: "white"
+            text: ""
+        }
+    }
 
     Connections {
-        target: shortcutAppModel
-        onUpdateShortcut: {
-            for(var i = 0; i < 4; i++) {
-                var item = repeater.itemAt(i)
-                item.name = shortcutAppModel.getName(i)
-                item.icon = shortcutAppModel.getIcon(i)
-                item.isBlank = shortcutAppModel.isBlank(i)
-            }
+        target: homescreenHandler
+        onInformation: {
+            informationText.text = text
+            bottomInformation.visible = true
+            informationTimer.restart()
         }
     }
 }

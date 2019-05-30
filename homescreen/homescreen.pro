@@ -18,7 +18,9 @@ TARGET = HomeScreen
 QT = qml quick dbus websockets
 CONFIG += c++11 link_pkgconfig
 DESTDIR = $${OUT_PWD}/../package/root/bin
-PKGCONFIG += qlibwindowmanager qlibhomescreen qtappfw afb-helpers-qt
+PKGCONFIG += libwindowmanager qtappfw
+
+LIBS += -lqthomescreen -lwindowmanager
 
 include(../interfaces/interfaces.pri)
 
@@ -27,26 +29,20 @@ SOURCES += \
     src/statusbarmodel.cpp \
     src/statusbarserver.cpp \
     src/applicationlauncher.cpp \
-    src/mastervolume.cpp \
     src/homescreenhandler.cpp \
-    src/toucharea.cpp \
-    src/shortcutappmodel.cpp
+    src/toucharea.cpp
 
 HEADERS  += \
     src/statusbarmodel.h \
     src/statusbarserver.h \
     src/applicationlauncher.h \
-    src/mastervolume.h \
     src/homescreenhandler.h \
-    src/toucharea.h \
-    src/shortcutappmodel.h
+    src/toucharea.h
 
 OTHER_FILES += \
     README.md
 
 RESOURCES += \
-    qml/images/MediaPlayer/mediaplayer.qrc \
-    qml/images/MediaMusic/mediamusic.qrc \
     qml/images/Weather/weather.qrc \
     qml/images/Shortcut/shortcut.qrc \
     qml/images/Status/status.qrc \

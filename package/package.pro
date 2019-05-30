@@ -12,12 +12,6 @@ copy_config.commands = $(COPY_FILE) \"$$replace(copy_config.depends, /, $$QMAKE_
 QMAKE_EXTRA_TARGETS += copy_config
 PRE_TARGETDEPS += $$copy_config.target
 
-copy_json.target = $$OUT_PWD/root/etc
-copy_json.depends = $$_PRO_FILE_PWD_/etc
-copy_json.commands = $(COPY_DIR) \"$$replace(copy_json.depends, /, $$QMAKE_DIR_SEP)\" \"$$replace(copy_json.target, /, $$QMAKE_DIR_SEP)\"
-QMAKE_EXTRA_TARGETS += copy_json
-PRE_TARGETDEPS += $$copy_json.target
-
 wgt.target = package
 wgt.commands = wgtpkg-pack -f -o homescreen.wgt root
 

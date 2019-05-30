@@ -21,13 +21,10 @@ import QtGraphicalEffects 1.0
 
 MouseArea {
     id: root
-    width: 195
-    height: 216.8
+    width: 70
+    height: 70
     property string name: 'Home'
-    property string icon:'./images/Shortcut/'
     property bool active: false
-    property bool isBlank: false
-
     Item {
         id: icon
         property real desaturation: 0
@@ -35,42 +32,14 @@ MouseArea {
         Image {
             id: inactiveIcon
             anchors.fill: parent
-            source: './images/Shortcut/blank.svg'
-//            source: isBlank ? './images/Shortcut/blank.svg' : root.icon
-            property string initial: root.name.substring(0,1).toUpperCase()
-            Label {
-                style: Text.Outline
-                styleColor: '#00FFFF'
-                color: 'transparent'
-                font.pixelSize: 75
-                anchors.centerIn: parent
-                text: inactiveIcon.initial
-                visible: root.isBlank
-            }
+            source: './images/Shortcut/%1.png'.arg(root.name.toLowerCase())
         }
         Image {
             id: activeIcon
             anchors.fill: parent
-            source: './images/Shortcut/blank_active.svg'
-//            source: isBlank ? './images/Shortcut/blank_active.svg' : root.icon
-            property string initial: root.name.substring(0,1).toUpperCase()
-            Label {
-                style: Text.Outline
-                styleColor: '#00FFFF'
-                color: 'transparent'
-                font.pixelSize: 75
-                anchors.centerIn: parent
-                text: activeIcon.initial
-                visible: root.isBlank
-            }
+            source: './images/Shortcut/%1_active.png'.arg(root.name.toLowerCase())
             opacity: 0.0
         }
-        Image {
-            id: sourceIcon
-            anchors.fill: parent
-            source: isBlank ? null : root.icon
-        }
-
         layer.enabled: true
         layer.effect: Desaturate {
             id: desaturate
@@ -79,30 +48,27 @@ MouseArea {
         }
     }
 
-    Label {
-        id: name
-        y: 160
-        width: root.width - 10
-        font.pixelSize: 15
-        font.letterSpacing: 5
-        // wrapMode: Text.WordWrap
-        anchors.horizontalCenter: parent.horizontalCenter
-        horizontalAlignment: Text.AlignHCenter
-        color: "white"
-        text: qsTr((root.name === "launcher" ? "home" : root.name).toUpperCase())
-    }
-
-    states: [
-        State {
-            when: root.active
-            PropertyChanges {
-                target: inactiveIcon
-                opacity: 0.0
+    transitions: [
+        Transition {
+            NumberAnimation {
+                properties: 'opacity'
+                duration: 500
+                easing.type: Easing.OutExpo
             }
-            PropertyChanges {
-                target: activeIcon
-                opacity: 1.0
+            NumberAnimation {
+                properties: 'desaturation'
+                duration: 250
             }
         }
     ]
+
+    onPressed: {
+        activeIcon.opacity = 1.0
+        inactiveIcon.opacity = 0.0
+    }
+
+    onReleased: {
+        activeIcon.opacity = 0.0
+        inactiveIcon.opacity = 1.0
+    }
 }

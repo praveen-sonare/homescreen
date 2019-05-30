@@ -1,7 +1,6 @@
 /*
  * Copyright (C) 2016 The Qt Company Ltd.
  * Copyright (C) 2016, 2017 Mentor Graphics Development (Deutschland) GmbH
- * Copyright (c) 2017, 2018 TOYOTA MOTOR CORPORATION
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +21,21 @@ import HomeScreen 1.0
 
 Item {
     id: root
-    width: 295
-    height: 218
+    width: 700
+    height: 80
 
     property date now: new Date
     Timer {
         interval: 100; running: true; repeat: true;
         onTriggered: root.now = new Date
+    }
+
+    Timer {
+        id:notificationTimer
+        interval: 3000
+        running: false
+        repeat: true
+        onTriggered: notificationItem.visible = false
     }
 
     Connections {
@@ -37,13 +44,13 @@ Item {
         onConditionChanged: {
             var icon = ''
 
-            if (condition.indexOf("clouds") != -1) {
+            if (condition.indexOf("clouds") !== -1) {
                 icon = "WeatherIcons_Cloudy-01.png"
-            } else if (condition.indexOf("thunderstorm") != -1) {
+            } else if (condition.indexOf("thunderstorm") !== -1) {
                 icon = "WeatherIcons_Thunderstorm-01.png"
-            } else if (condition.indexOf("snow") != -1) {
+            } else if (condition.indexOf("snow") !== -1) {
                 icon = "WeatherIcons_Snow-01.png"
-            } else if (condition.indexOf("rain") != -1) {
+            } else if (condition.indexOf("rain") !== -1) {
                 icon = "WeatherIcons_Rain-01.png"
             }
 
@@ -55,105 +62,153 @@ Item {
         }
     }
 
-    RowLayout {
-        anchors.fill: parent
-        spacing: 0
-        Item {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.preferredWidth: 295 - 76
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 40
-                spacing: 0
-                Text {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    text: Qt.formatDate(now, 'dddd').toUpperCase()
-                    font.family: 'Roboto'
-                    font.pixelSize: 13
-                    color: 'white'
-                    verticalAlignment:  Text.AlignVCenter
-//                    Rectangle {
-//                        anchors.fill: parent
-//                        anchors.margins: 5
-//                        color: 'red'
-//                        border.color: 'blue'
-//                        border.width: 1
-//                        z: -1
-//                    }
+        RowLayout {
+            anchors.fill: parent
+            spacing: 0
+            RowLayout {
+                id: icons
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredWidth: 120
+                spacing: -10
+
+                Image {
+                    id: bt_icon
+                    Layout.preferredWidth: 50
+                    Layout.preferredHeight: 50
+                    source: connStatus ? './images/Status/HMI_Status_Bluetooth_On-01.png' : './images/Status/HMI_Status_Bluetooth_Inactive-01.png'
+                    fillMode: Image.PreserveAspectFit
+                    property string deviceName: "none"
+                    property bool connStatus: false
+                    Connections {
+                        target: bluetooth
+                        onConnectionEvent: {
+                            console.log("onConnectionEvent", data.Status)
+                            if (data.Status === "connected") {
+                                bt_icon.connStatus = true
+                            } else if (data.Status === "disconnected") {
+                                bt_icon.connStatus = false
+                            }
+                        }
+                        onDeviceUpdateEvent: {
+                            console.log("onConnectionEvent", data.Paired)
+                            if (data.Paired === "True" && data.Connected === "True") {
+                                bt_icon.deviceName = data.name
+                                bt_icon.connStatus = true
+                            } else {
+                                if(bt_icon.deviceName === data.Name)
+                                {
+                                    bt_icon.connStatus = false
+                                }
+                            }
+                        }
+                    }
                 }
-                Text {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    text: Qt.formatTime(now, 'h:mm ap').toUpperCase()
-                    font.family: 'Roboto'
-                    font.pixelSize: 40
-                    color: 'white'
-                    horizontalAlignment:  Text.AlignHCenter
-                    verticalAlignment:  Text.AlignVCenter
+
+                Repeater {
+                    model: StatusBarModel { objectName: "statusBar" }
+                    delegate: Image {
+                        Layout.preferredWidth: 50
+                        Layout.preferredHeight: 50
+                        source: model.modelData
+                        fillMode: Image.PreserveAspectFit
+                    }
                 }
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.preferredHeight: 20
-                    Image {
-                        id: condition_item
-                        source: './images/Weather/WeatherIcons_Rain-01.png'
+            }
+            Item {
+                anchors.left: icons.right
+                Layout.fillHeight: true
+                width: 440
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: 17
+                    spacing: 0
+                    Text {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        text: Qt.formatDate(now, 'dddd').toUpperCase()
+                        font.family: 'Roboto'
+                        font.pixelSize: 13
+                        color: 'white'
+                        horizontalAlignment:  Text.AlignHCenter
+                        verticalAlignment:  Text.AlignVCenter
                     }
                     Text {
-                        id: temperature_item
-                        text: '64°F'
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        text: Qt.formatTime(now, 'h:mm ap').toUpperCase()
+                        font.family: 'Roboto'
+                        font.pixelSize: 38
                         color: 'white'
-                        font.family: 'Helvetica'
-                        font.pixelSize: 32
-                    }
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        homescreenHandler.killRunningApplications()
+                        horizontalAlignment:  Text.AlignHCenter
+                        verticalAlignment:  Text.AlignVCenter
                     }
                 }
             }
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredHeight: 20
+
+                Image {
+                    id: condition_item
+                    source: './images/Weather/WeatherIcons_Rain-01.png'
+                }
+                Text {
+                    id: temperature_item
+                    text: '64°F'
+                    color: 'white'
+                    font.family: 'Helvetica'
+                    font.pixelSize: 32
+                }
+            }
         }
-        ColumnLayout {
-            id: icons
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.preferredWidth: 76
-            spacing: -10
+
+        Item {
+            id: notificationItem
+            x: 0
+            y: 0
+            z: 1
+            width: parent.width
+            height: 100
+            opacity: 0.8
+            visible: false
+
             Rectangle {
-                Layout.preferredWidth: 77
-                Layout.preferredHeight: 55
-                opacity: 0
-            }
-
-            Image {
-                id: bt_icon
-                Layout.preferredWidth: 77
-                Layout.preferredHeight: 55
-                source: connStatus ? './images/Status/HMI_Status_Bluetooth_On-01.png' : './images/Status/HMI_Status_Bluetooth_Inactive-01.png'
-                fillMode: Image.PreserveAspectFit
-                property string deviceName: "none"
-                property bool connStatus: false
-                Connections {
-                    target: bluetooth
-
-                    onPowerChanged: {
-                            bt_icon.connStatus = state
-                    }
+                width: parent.width
+                height: parent.height
+                anchors.fill: parent
+                color: "gray"
+                Image {
+                    id: notificationIcon
+                    width: 70
+                    height: 70
+                    anchors.left: parent.left
+                    anchors.leftMargin: 20
+                    anchors.verticalCenter: parent.verticalCenter
+                    source: ""
                 }
-            }
-            Repeater {
-                model: StatusBarModel { objectName: "statusBar" }
-                delegate: Image {
-                    Layout.preferredWidth: 77
-                    Layout.preferredHeight: 55
-                    source: model.modelData
-                    fillMode: Image.PreserveAspectFit
+
+                Text {
+                    id: notificationtext
+                    font.pixelSize: 25
+                    anchors.left: notificationIcon.right
+                    anchors.leftMargin: 5
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: "white"
+                    text: qsTr("")
                 }
             }
         }
-    }
+
+        Connections {
+            target: homescreenHandler
+            onNotification: {
+                notificationIcon.source = './images/Shortcut/%1.svg'.arg(id)
+                notificationtext.text = text
+                notificationItem.visible = true
+                notificationTimer.restart()
+            }
+        }
+
 }

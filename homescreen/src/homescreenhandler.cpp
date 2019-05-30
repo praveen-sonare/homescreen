@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018, 2019 TOYOTA MOTOR CORPORATION
+ * Copyright (c) 2017 TOYOTA MOTOR CORPORATION
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-#include <QFileInfo>
 #include "homescreenhandler.h"
 #include <functional>
+#include <QQmlApplicationEngine>
+#include <QtQuick/QQuickWindow>
 #include <QProcess>
-#include <dirent.h>
-#include <stdio.h>
 #include "hmi-debug.h"
 
-#define BUF_SIZE 1024
 void* HomescreenHandler::myThis = 0;
 
 HomescreenHandler::HomescreenHandler(QObject *parent) :
     QObject(parent),
-    mp_qhs(NULL),
-    current_application("launcher")
+    mp_qhs(NULL), mp_wm(NULL), m_role()
 {
+
 }
 
 HomescreenHandler::~HomescreenHandler()
@@ -37,170 +35,100 @@ HomescreenHandler::~HomescreenHandler()
     if (mp_qhs != NULL) {
         delete mp_qhs;
     }
+    if (mp_wm != NULL) {
+        delete mp_wm;
+    }
 }
 
-void HomescreenHandler::init(int port, const char *token, QLibWindowmanager *qwm, QString myname)
+void HomescreenHandler::init(const char* role, int port, const char *token)
 {
+    this->m_role = role;
+
+    // LibWindowManager initialize
+    mp_wm = new LibWindowmanager();
+    if(mp_wm->init(port,token) != 0){
+        exit(EXIT_FAILURE);
+    }
+
+    int surface = mp_wm->requestSurface(m_role.c_str());
+    if (surface < 0) {
+        exit(EXIT_FAILURE);
+    }
+    std::string ivi_id = std::to_string(surface);
+    setenv("QT_IVI_SURFACE_ID", ivi_id.c_str(), true);
+
+    // LibHomeScreen initialize
     mp_qhs = new QLibHomeScreen();
     mp_qhs->init(port, token);
 
     myThis = this;
-    mp_qwm = qwm;
-    m_myname = myname;
 
     mp_qhs->registerCallback(nullptr, HomescreenHandler::onRep_static);
-
-    mp_qhs->set_event_handler(QLibHomeScreen::Event_ShowWindow,[this](json_object *object){
-        HMI_DEBUG("Launcher","Surface launcher got Event_ShowWindow\n");
-        static bool first_start = true;
-        if (first_start) {
-            first_start = false;
-            mp_qwm->activateWindow(m_myname);
-        }
-        else {
-            emit showWindow();
-        }
-    });
 
     mp_qhs->set_event_handler(QLibHomeScreen::Event_OnScreenMessage, [this](json_object *object){
         const char *display_message = json_object_get_string(
             json_object_object_get(object, "display_message"));
         HMI_DEBUG("HomeScreen","set_event_handler Event_OnScreenMessage display_message = %s", display_message);
     });
-
-    mp_qhs->set_event_handler(QLibHomeScreen::Event_ShowNotification,[this](json_object *object){
-       json_object *p_obj = json_object_object_get(object, "parameter");
-       const char *icon = json_object_get_string(
-                   json_object_object_get(p_obj, "icon"));
-       const char *text = json_object_get_string(
-                   json_object_object_get(p_obj, "text"));
-       const char *app_id = json_object_get_string(
-                   json_object_object_get(p_obj, "caller"));
-       HMI_DEBUG("HomeScreen","Event_ShowNotification icon=%s, text=%s, caller=%s", icon, text, app_id);
-       QFileInfo icon_file(icon);
-       QString icon_path;
-       if (icon_file.isFile() && icon_file.exists()) {
-           icon_path = QString(QLatin1String(icon));
-       } else {
-           icon_path = "./images/Utility_Logo_Grey-01.svg";
-       }
-
-       emit showNotification(QString(QLatin1String(app_id)), icon_path, QString(QLatin1String(text)));
-    });
-
-    mp_qhs->set_event_handler(QLibHomeScreen::Event_ShowInformation,[this](json_object *object){
-       json_object *p_obj = json_object_object_get(object, "parameter");
-       const char *info = json_object_get_string(
-                   json_object_object_get(p_obj, "info"));
-
-       emit showInformation(QString(QLatin1String(info)));
-    });
-
-    mp_qhs->set_event_handler(QLibHomeScreen::Event_HideWindow, [this](json_object *object) {
-        emit hideWindow();
-        HMI_DEBUG("HomeScreen","set_event_handler Event_HideWindow");
-    });
-
-    mp_qhs->set_event_handler(QLibHomeScreen::Event_RegisterShortcut,[this](json_object *object){
-        HMI_DEBUG("HomeScreen","set_event_handler Event_RegisterShortcut");
-        json_object *p_obj = json_object_object_get(object, "parameter");
-        const char *shortcut_id = json_object_get_string(
-                    json_object_object_get(p_obj, "shortcut_id"));
-        const char *shortcut_name = json_object_get_string(
-                    json_object_object_get(p_obj, "shortcut_name"));
-        const char *position = json_object_get_string(
-                    json_object_object_get(p_obj, "position"));
-        HMI_DEBUG("HomeScreen", "Event_RegisterShortcut id==%s, name==%s, position ==%s", shortcut_id, shortcut_name, position);
-        emit shortcutChanged(QString(QLatin1String(shortcut_id)), QString(QLatin1String(shortcut_name)), QString(QLatin1String(position)));
-    });
 }
 
-void HomescreenHandler::tapShortcut(QString application_id, bool is_full)
+void HomescreenHandler::setWMHandler(WMHandler& h) {
+    h.on_sync_draw = [&](const char* role, const char* area, Rect r) {
+        this->mp_wm->endDraw(this->m_role.c_str());
+    };
+    mp_wm->setEventHandler(h);
+}
+
+void HomescreenHandler::disconnect_frame_swapped(void)
 {
-    HMI_DEBUG("HomeScreen","tapShortcut %s", application_id.toStdString().c_str());
-    struct json_object* j_json = json_object_new_object();
-    struct json_object* value;
-    if(is_full) {
-        value = json_object_new_string("fullscreen");
-        HMI_DEBUG("HomeScreen","fullscreen");
-    } else {
-        value = json_object_new_string("normal.full");
-        HMI_DEBUG("HomeScreen","normal");
+    qDebug("Let's start homescreen");
+    QObject::disconnect(this->loading);
+    mp_wm->activateWindow(m_role.c_str(), "fullscreen");
+}
+
+void HomescreenHandler::attach(QQmlApplicationEngine* engine)
+{
+    QQuickWindow *window = qobject_cast<QQuickWindow *>(engine->rootObjects().first());
+//    this->loading = QObject::connect(window, SIGNAL(frameSwapped()), this, SLOT(disconnect_frame_swapped()));
+    mp_qhs->setQuickWindow(window);
+}
+
+void HomescreenHandler::changeLayout(int pattern)
+{
+    HMI_NOTICE("HomeScreen", "Pressed %d, %s", pattern,
+        (pattern == P_LEFT_METER_RIGHT_MAP) ? "left:meter, right:map": "left:map, right:meter");
+    ChangeAreaReq req;
+    std::unordered_map<std::string, Rect> map_list;
+    switch(pattern) {
+        case P_LEFT_METER_RIGHT_MAP:
+            map_list["split.main"] = Rect(0, 0, 1280, 720);
+            map_list["split.sub"] = Rect(1280, 0, 640, 720);
+            break;
+        case P_LEFT_MAP_RIGHT_METER:
+            map_list["split.main"] = Rect(640, 0, 1280, 720);
+            map_list["split.sub"] = Rect(0, 0, 640, 720);
+            break;
+        default:
+            break;
     }
-    json_object_object_add(j_json, "area", value);
-    mp_qhs->showWindow(application_id.section('@', 0, 0).toStdString().c_str(), j_json);
-}
-
-void HomescreenHandler::updateShortcut(QString id, struct json_object* object)
-{
-    mp_qhs->updateShortcut(id.toStdString().c_str(), object);
-}
-
-
-void HomescreenHandler::setCurrentApplication(QString application_name)
-{
-    HMI_DEBUG("HomeScreen","setCurrentApplication %s", application_name.toStdString().c_str());
-    current_application = application_name;
-}
-
-QString HomescreenHandler::getCurrentApplication()
-{
-    HMI_DEBUG("HomeScreen","getCurrentApplication %s", current_application.toStdString().c_str());
-    return current_application;
-}
-
-int HomescreenHandler::getPidOfApplication(QString application_name) {
-    DIR *dir = NULL;
-    struct dirent *dir_ent_ptr = NULL;
-    FILE *fp = NULL;
-    char file_path[50] = {0};
-    char cur_task_ame[50] = {0};
-    char buf[BUF_SIZE] = {0};
-    int pid = -1;
-
-    dir = opendir("/proc");
-    if (dir) {
-        while((dir_ent_ptr = readdir(dir)) != NULL) {
-            if ((strcmp(dir_ent_ptr->d_name, ".") == 0) || (strcmp(dir_ent_ptr->d_name, "..") == 0)
-                || (DT_DIR != dir_ent_ptr->d_type))
-                continue;
-            sprintf(file_path, "/proc/%s/status", dir_ent_ptr->d_name);
-            fp = fopen(file_path, "r");
-            if (fp) {
-                if (fgets(buf, BUF_SIZE - 1, fp) == NULL) {
-                    fclose(fp);
-                    continue;
-                }
-                sscanf(buf, "%*s %s", cur_task_ame);
-                if (0 == strcmp(application_name.toStdString().c_str(), cur_task_ame)) {
-                    pid = atoi(dir_ent_ptr->d_name);
-                    break;
-                }
-            }
-        }
+    if(map_list.size() != 0)
+    {
+        req.setAreaReq(map_list);
+        HMI_NOTICE("Homescreen", "Change layout");
+        mp_wm->changeAreaSize(req);
     }
-
-    return pid;
-}
-
-void HomescreenHandler::killRunningApplications()
-{
-    QProcess *proc = new QProcess;
-    QProcess *proc2 = new QProcess;
-//    int num = getPidOfApplication("afbd-video@0.1");
-//    QString procNum = QString::number(num);
-    QString command = "/usr/bin/pkill videoplayer";
-    QString command2 = "/usr/bin/pkill navigation";
-    proc->start(command);
-    proc2->start(command2);
-    HMI_DEBUG("homescreen", command.toStdString().c_str());
-    HMI_DEBUG("homescreen", command2.toStdString().c_str());
 }
 
 void HomescreenHandler::reboot()
 {
     QProcess::execute("sync");
     QProcess::execute("reboot -f");
+}
+
+void HomescreenHandler::tapShortcut(QString application_name)
+{
+    HMI_DEBUG("HomeScreen","tapShortcut %s", application_name.toStdString().c_str());
+    mp_qhs->tapShortcut(application_name.toStdString().c_str());
 }
 
 void HomescreenHandler::onRep_static(struct json_object* reply_contents)
@@ -231,9 +159,4 @@ void HomescreenHandler::onEv(const string& event, struct json_object* event_cont
 
         HMI_DEBUG("HomeScreen","display_message = %s", display_message);
     }
-}
-
-void HomescreenHandler::setQuickWindow(QQuickWindow *qw)
-{
-    mp_qhs->setQuickWindow(qw);
 }
