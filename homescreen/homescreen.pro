@@ -20,7 +20,7 @@ CONFIG += c++11 link_pkgconfig
 DESTDIR = $${OUT_PWD}/../package/root/bin
 PKGCONFIG += libwindowmanager qtappfw
 
-LIBS += -lhomescreen -lwindowmanager
+LIBS += -lqthomescreen -lwindowmanager
 
 include(../interfaces/interfaces.pri)
 

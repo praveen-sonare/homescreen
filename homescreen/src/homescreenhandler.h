@@ -18,7 +18,7 @@
 #define HOMESCREENHANDLER_H
 
 #include <QObject>
-#include <libhomescreen.hpp>
+#include <qlibhomescreen.h>
 #include <libwindowmanager.h>
 #include <string>
 
@@ -60,7 +60,7 @@ private Q_SLOTS:
     void disconnect_frame_swapped(void);
 
 private:
-    LibHomeScreen *mp_hs;
+    QLibHomeScreen *mp_qhs;
     LibWindowmanager *mp_wm;
     std::string m_role;
     QMetaObject::Connection loading;

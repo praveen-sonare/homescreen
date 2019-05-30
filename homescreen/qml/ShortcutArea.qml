@@ -74,19 +74,19 @@ Item {
                 name: model.name
                 active: model.name === launcher.current
                 onClicked: {
-                    if(model.application === 'navigation@0.1') {
-                        pid = launcher.launch('browser@5.0')
-                    } else {
-                        pid = launcher.launch(model.application.toLowerCase())
-                    }
+//                    if(model.application === 'navigation@0.1') {
+//                        pid = launcher.launch('browser@5.0')
+//                    } else {
+//                        pid = launcher.launch(model.application.toLowerCase())
+//                    }
 
-                    if (1 < pid) {
+//                    if (1 < pid) {
                         applicationArea.visible = true
-                    }
-                    else {
-                        console.warn(model.application)
-                        console.warn("app cannot be launched!")
-                    }
+//                    }
+//                    else {
+//                        console.warn(model.application)
+//                        console.warn("app cannot be launched!")
+//                    }
                     if(model.name === 'Navigation') {
                         homescreenHandler.tapShortcut('browser')
                     } else {

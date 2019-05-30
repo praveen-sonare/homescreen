@@ -24,15 +24,15 @@ void* HomescreenHandler::myThis = 0;
 
 HomescreenHandler::HomescreenHandler(QObject *parent) :
     QObject(parent),
-    mp_hs(NULL), mp_wm(NULL), m_role()
+    mp_qhs(NULL), mp_wm(NULL), m_role()
 {
 
 }
 
 HomescreenHandler::~HomescreenHandler()
 {
-    if (mp_hs != NULL) {
-        delete mp_hs;
+    if (mp_qhs != NULL) {
+        delete mp_qhs;
     }
     if (mp_wm != NULL) {
         delete mp_wm;
@@ -57,14 +57,23 @@ void HomescreenHandler::init(const char* role, int port, const char *token)
     setenv("QT_IVI_SURFACE_ID", ivi_id.c_str(), true);
 
     // LibHomeScreen initialize
-    mp_hs = new LibHomeScreen();
-    mp_hs->init(port, token);
+    mp_qhs = new QLibHomeScreen();
+    mp_qhs->init(port, token);
 
     myThis = this;
 
-    mp_hs->registerCallback(nullptr, HomescreenHandler::onRep_static);
+    mp_qhs->registerCallback(nullptr, HomescreenHandler::onRep_static);
 
-    mp_hs->set_event_handler(LibHomeScreen::Event_OnScreenMessage, [this](json_object *object){
+    mp_qhs->set_event_handler(QLibHomeScreen::Event_ShowWindow,[this](json_object *object){
+        HMI_DEBUG("HomeScreen","Surface HomeScreen got Event_ShowWindow\n");
+        static bool first_start = true;
+        if (first_start) {
+            first_start = false;
+            this->mp_wm->activateWindow(this->m_role.c_str(), "fullscreen");
+        }
+    });
+
+    mp_qhs->set_event_handler(QLibHomeScreen::Event_OnScreenMessage, [this](json_object *object){
         const char *display_message = json_object_get_string(
             json_object_object_get(object, "display_message"));
         HMI_DEBUG("HomeScreen","set_event_handler Event_OnScreenMessage display_message = %s", display_message);
@@ -88,7 +97,8 @@ void HomescreenHandler::disconnect_frame_swapped(void)
 void HomescreenHandler::attach(QQmlApplicationEngine* engine)
 {
     QQuickWindow *window = qobject_cast<QQuickWindow *>(engine->rootObjects().first());
-    this->loading = QObject::connect(window, SIGNAL(frameSwapped()), this, SLOT(disconnect_frame_swapped()));
+//    this->loading = QObject::connect(window, SIGNAL(frameSwapped()), this, SLOT(disconnect_frame_swapped()));
+    mp_qhs->setQuickWindow(window);
 }
 
 void HomescreenHandler::changeLayout(int pattern)
@@ -120,7 +130,7 @@ void HomescreenHandler::changeLayout(int pattern)
 void HomescreenHandler::tapShortcut(QString application_name)
 {
     HMI_DEBUG("HomeScreen","tapShortcut %s", application_name.toStdString().c_str());
-    mp_hs->tapShortcut(application_name.toStdString().c_str());
+    mp_qhs->tapShortcut(application_name.toStdString().c_str());
 }
 
 void HomescreenHandler::onRep_static(struct json_object* reply_contents)
