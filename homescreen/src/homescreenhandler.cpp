@@ -70,6 +70,15 @@ void HomescreenHandler::init(const char* role, int port, const char *token)
             json_object_object_get(object, "display_message"));
         HMI_DEBUG("HomeScreen","set_event_handler Event_OnScreenMessage display_message = %s", display_message);
     });
+
+    mp_qhs->set_event_handler(QLibHomeScreen::Event_ShowWindow,[this](json_object *object){
+        HMI_DEBUG("HomeScreen","Surface HomeScreen got Event_ShowWindow\n");
+        static bool first_start = true;
+        if (first_start) {
+            first_start = false;
+            this->mp_wm->activateWindow(this->m_role.c_str(), "fullscreen");
+        }
+    });
 }
 
 void HomescreenHandler::setWMHandler(WMHandler& h) {
