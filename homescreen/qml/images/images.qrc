@@ -1,8 +1,9 @@
 <RCC>
     <qresource prefix="/images">
         <file>menubar_background.png</file>
-        <file>menubar_normal_background.png</file>
-        <file>menubar_full_background.png</file>
+        <file>menubar_fullscreen_background.png</file>
+        <file>menubar_normal_mask.png</file>
+        <file>menubar_fullscreen_mask.png</file>
         <file>fullscreen.png</file>
         <file>normal.png</file>
         <file>split_switch.png</file>

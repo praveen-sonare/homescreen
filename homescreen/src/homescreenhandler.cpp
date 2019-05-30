@@ -110,12 +110,12 @@ void HomescreenHandler::changeLayout(int pattern)
     std::unordered_map<std::string, Rect> map_list;
     switch(pattern) {
         case P_LEFT_METER_RIGHT_MAP:
-            map_list["split.main"] = Rect(0, 0, 1280, 720);
-            map_list["split.sub"] = Rect(1280, 0, 640, 720);
+            map_list["split.main"] = Rect(0, 180, 1280, 720);
+            map_list["split.sub"] = Rect(1280, 180, 640, 720);
             break;
         case P_LEFT_MAP_RIGHT_METER:
-            map_list["split.main"] = Rect(640, 0, 1280, 720);
-            map_list["split.sub"] = Rect(0, 0, 640, 720);
+            map_list["split.main"] = Rect(640, 180, 1280, 720);
+            map_list["split.sub"] = Rect(0, 180, 640, 720);
             break;
         default:
             break;

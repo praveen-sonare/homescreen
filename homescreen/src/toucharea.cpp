@@ -16,8 +16,8 @@ void TouchArea::setWindow(QQuickWindow *window)
 
 void TouchArea::init()
 {
-    bitmapNormal = QPixmap(":/images/menubar_normal_background.png").createHeuristicMask();
-    bitmapFullscreen = QPixmap(":/images/menubar_full_background.png").createHeuristicMask();
+    bitmapNormal = QPixmap(":/images/menubar_normal_mask.png").createHeuristicMask();
+    bitmapFullscreen = QPixmap(":/images/menubar_fullscreen_mask.png").createHeuristicMask();
     myWindow->setMask(QRegion(bitmapNormal));
 }
 
