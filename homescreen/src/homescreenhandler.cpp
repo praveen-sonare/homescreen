@@ -133,7 +133,7 @@ void HomescreenHandler::tapShortcut(QString application_id, bool is_full)
 
 void HomescreenHandler::updateShortcut(QString id, struct json_object* object)
 {
-    mp_qhs->updateShortcut(id.toStdString().c_str(), object);
+    mp_qhs->updateShortcut(id, object);
 }
 
 

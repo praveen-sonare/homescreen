@@ -20,6 +20,9 @@ CONFIG += c++11 link_pkgconfig
 DESTDIR = $${OUT_PWD}/../package/root/bin
 PKGCONFIG += qlibwindowmanager qlibhomescreen qtappfw afb-helpers-qt
 
+LIBS += -lafbwsc
+LIBS += -lsystemd
+
 include(../interfaces/interfaces.pri)
 
 SOURCES += \
@@ -30,7 +33,8 @@ SOURCES += \
     src/mastervolume.cpp \
     src/homescreenhandler.cpp \
     src/toucharea.cpp \
-    src/shortcutappmodel.cpp
+    src/shortcutappmodel.cpp \
+    src/homescreenvoice.cpp
 
 HEADERS  += \
     src/statusbarmodel.h \
@@ -39,7 +43,8 @@ HEADERS  += \
     src/mastervolume.h \
     src/homescreenhandler.h \
     src/toucharea.h \
-    src/shortcutappmodel.h
+    src/shortcutappmodel.h \
+    src/homescreenvoice.h
 
 OTHER_FILES += \
     README.md

@@ -122,7 +122,6 @@ struct json_object* ShortcutAppModel::makeAppListJson()
         json_object_array_add(obj_array, obj_shortcut);
     }
     json_object_object_add(obj, "shortcut", obj_array);
-    HMI_DEBUG("Homescreen", "makeAppListJson id1=%s",json_object_new_string(d->data.at(1).name.toStdString().c_str()));
     return obj;
 }
 

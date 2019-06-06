@@ -142,13 +142,15 @@ Window {
                         container.state = 'fullscreen'
                         touchArea.switchArea(1)
                         homescreenHandler.tapShortcut(appName, true)
-                        container.opacity = 0.0
+                        container.visible = false
+                        voiceBtn.visible = false
                     } else {
                         image.source = './images/normal.png'
                         container.state = 'normal'
                         touchArea.switchArea(0)
                         homescreenHandler.tapShortcut(appName, false)
-                        container.opacity = 1.0
+                        container.visible = true
+                        voiceBtn.visible = true
                     }
                 }
             }
@@ -189,6 +191,7 @@ Window {
             image.visible = true
             touchArea.switchArea(0)
             container.opacity = 1.0
+            voiceBtn.visible = true
         }
     }
 
@@ -199,6 +202,7 @@ Window {
             image.visible = false
             touchArea.switchArea(1)
             container.opacity = 0.0
+            voiceBtn.visible = false
         }
     }
 
@@ -291,6 +295,38 @@ Window {
             notificationtext.text = text
             notificationItem.visible = true
             notificationTimer.restart()
+        }
+    }
+
+    Connections {
+        target: homescreenVoice
+        onStatusChanged: {
+            voiceBtn.visible = status
+        }
+    }
+
+    Item {
+        id: voiceBtn
+        width: 110
+        height: 110
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        anchors.bottomMargin: 50
+        anchors.rightMargin: 0
+        visible: true
+        Image {
+            id: voiceimage
+            anchors.left: parent.left
+            anchors.top: parent.top
+            width: 110
+            height: 110
+            source: './images/voice.png'
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                homescreenVoice.startListening();
+            }
         }
     }
 }

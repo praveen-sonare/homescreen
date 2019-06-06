@@ -32,6 +32,7 @@
 #include "afm_user_daemon_proxy.h"
 #include "mastervolume.h"
 #include "homescreenhandler.h"
+#include "homescreenvoice.h"
 #include "toucharea.h"
 #include "shortcutappmodel.h"
 #include "hmi-debug.h"
@@ -100,6 +101,8 @@ int main(int argc, char *argv[])
     QLibWindowmanager* layoutHandler = new QLibWindowmanager();
     HomescreenHandler* homescreenHandler = new HomescreenHandler();
     ShortcutAppModel* shortcutAppModel = new ShortcutAppModel();
+    HomescreenVoice* homescreenVoice = new HomescreenVoice();
+
     if(layoutHandler->init(port,token) != 0){
         exit(EXIT_FAILURE);
     }
@@ -122,12 +125,14 @@ int main(int argc, char *argv[])
 
     TouchArea* touchArea = new TouchArea();
     homescreenHandler->init(port, token.toStdString().c_str(), layoutHandler, graphic_role);
+	homescreenVoice->init(port, token.toStdString().c_str());
 
     // mail.qml loading
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("bindingAddress", bindingAddress);
     engine.rootContext()->setContextProperty("layoutHandler", layoutHandler);
     engine.rootContext()->setContextProperty("homescreenHandler", homescreenHandler);
+    engine.rootContext()->setContextProperty("homescreenVoice", homescreenVoice);
     engine.rootContext()->setContextProperty("touchArea", touchArea);
     engine.rootContext()->setContextProperty("shortcutAppModel", shortcutAppModel);
     engine.rootContext()->setContextProperty("launcher", launcher);
@@ -144,15 +149,16 @@ int main(int argc, char *argv[])
         layoutHandler->endDraw(graphic_role);
     });
 
-    layoutHandler->set_event_handler(QLibWindowmanager::Event_ScreenUpdated, [layoutHandler, launcher, homescreenHandler, root](json_object *object) {
+    layoutHandler->set_event_handler(QLibWindowmanager::Event_ScreenUpdated, [layoutHandler, launcher, homescreenHandler, shortcutAppModel, root](json_object *object) {
         json_object *jarray = json_object_object_get(object, "ids");
         HMI_DEBUG("HomeScreen","ids=%s", json_object_to_json_string(object));
         int arrLen = json_object_array_length(jarray);
         QString label = QString("");
+        static bool first_start = true;
         for( int idx = 0; idx < arrLen; idx++)
         {
             label = QString(json_object_get_string(	json_object_array_get_idx(jarray, idx) ));
-            HMI_DEBUG("HomeScreen","Event_ScreenUpdated application11: %s.", label.toStdString().c_str());
+            HMI_DEBUG("HomeScreen","Event_ScreenUpdated application: %s.", label.toStdString().c_str());
             homescreenHandler->setCurrentApplication(label);
             QMetaObject::invokeMethod(launcher, "setCurrent", Qt::QueuedConnection, Q_ARG(QString, label));
         }
@@ -161,6 +167,12 @@ int main(int argc, char *argv[])
         }else{
             QMetaObject::invokeMethod(root, "changeSwitchState", Q_ARG(QVariant, false));
         }
+	if(first_start) {
+            if((arrLen == 1) && (QString("launcher") == label)) {
+                first_start = false;
+                shortcutAppModel->screenUpdated();
+            }
+	}
     });
 
     touchArea->setWindow(window);
@@ -176,8 +188,6 @@ int main(int argc, char *argv[])
 
     QObject::connect(homescreenHandler, SIGNAL(shortcutChanged(QString, QString, QString)), shortcutAppModel, SLOT(changeShortcut(QString, QString, QString)));
     QObject::connect(shortcutAppModel, SIGNAL(shortcutUpdated(QString, struct json_object*)), homescreenHandler, SLOT(updateShortcut(QString, struct json_object*)));
-
-    shortcutAppModel->screenUpdated();
 
     return a.exec();
 }
