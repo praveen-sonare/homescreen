@@ -206,17 +206,19 @@ void HomescreenVoice::on_event(void *closure, const char *event, struct afb_wsj1
         return;
     }
 
-    const char* corestatus = json_object_get_string(json_state);
+    const char* info = json_object_get_string(json_state);
 
-    if (strcasecmp(corestatus, HomescreenVoice::state_lists[0].c_str()) == 0) {
+    if (strcasecmp(info, HomescreenVoice::state_lists[0].c_str()) == 0) {
         emit statusChanged(true);
     }
-    else if ((strcasecmp(corestatus, HomescreenVoice::state_lists[1].c_str()) == 0)||
-             (strcasecmp(corestatus, HomescreenVoice::state_lists[2].c_str()) == 0)||
-             (strcasecmp(corestatus, HomescreenVoice::state_lists[3].c_str()) == 0)||
-             (strcasecmp(corestatus, HomescreenVoice::state_lists[4].c_str()) == 0)){
+    else if ((strcasecmp(info, HomescreenVoice::state_lists[1].c_str()) == 0)||
+             (strcasecmp(info, HomescreenVoice::state_lists[2].c_str()) == 0)||
+             (strcasecmp(info, HomescreenVoice::state_lists[3].c_str()) == 0)||
+             (strcasecmp(info, HomescreenVoice::state_lists[4].c_str()) == 0)){
         emit statusChanged(false);
     }
+
+    emit showInformation(QString(QLatin1String(info)));
 }
 
 /**

@@ -243,6 +243,15 @@ Window {
         }
     }
 
+    Connections {
+        target: homescreenVoice
+        onShowInformation: {
+            bottomText.text = info
+            bottomInformation.visible = true
+            informationTimer.restart()
+        }
+    }
+
 	Timer {
         id:notificationTimer
         interval: 3000

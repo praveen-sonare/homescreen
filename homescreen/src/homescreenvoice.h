@@ -47,6 +47,7 @@ public:
     Q_INVOKABLE int startListening(void);
 signals:
     void statusChanged(bool status);
+    void showInformation(QString info);
 
 private:
     int initialize_websocket(void);
