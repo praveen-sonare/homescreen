@@ -18,7 +18,6 @@
  */
 
 #include <gst/gst.h>
-
 #include <gst/video/video.h>
 #include <gst/video/videooverlay.h>
 
