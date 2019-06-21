@@ -38,6 +38,8 @@ public:
     explicit HomescreenVoice(QObject *parent = 0);
     ~HomescreenVoice();
     static const std::vector<std::string> state_lists;
+    static const std::vector<std::string> connect_lists;
+    static const std::vector<std::string> event_lists;
 
     int init(int port, const string& token);
     void on_hangup(void *closure, struct afb_wsj1 *wsj);
@@ -59,7 +61,7 @@ private:
     std::string muri;
     int mport = 2000;
     std::string mtoken = "hs";
-
+    bool connect = false;
 };
 
 #endif // HOMESCREENVOICE_H

@@ -26,7 +26,7 @@
 
 
 static const char API[] = "vshl-core";
-const string vshl_core_event = "{\"va_id\": \"VA-001\", \"events\": [\"voice_dialogstate_event\"]}";
+const string vshl_core_event = "{\"va_id\": \"VA-001\", \"events\": [\"voice_dialogstate_event\",\"voice_connectionstate_event\"]}";
 
 static void _on_hangup_static(void *closure, struct afb_wsj1 *wsj)
 {
@@ -56,6 +56,15 @@ const std::vector<std::string> HomescreenVoice::state_lists {
     std::string("SPEAKING")
 };
 
+const std::vector<std::string> HomescreenVoice::connect_lists {
+    std::string("DISCONNECTED"),
+    std::string("CONNECTED")
+};
+
+const std::vector<std::string> HomescreenVoice::event_lists {
+    std::string("vshl-core/voice_dialogstate_event#VA-001"),
+    std::string("vshl-core/voice_connectionstate_event#VA-001")
+};
 
 static void event_loop_run(struct sd_event* loop){
     sd_event_loop(loop);
@@ -193,32 +202,53 @@ void HomescreenVoice::on_event(void *closure, const char *event, struct afb_wsj1
         return;
     }
     struct json_object* ev_contents = afb_wsj1_msg_object_j(msg);
+    struct json_object *json_event_str;
+
+    if(!json_object_object_get_ex(ev_contents, "event", &json_event_str)) {
+        HMI_ERROR("HomescreenVoice", "got json_event_str error.");
+        return;
+    }
     struct json_object *json_data_str;
     if(!json_object_object_get_ex(ev_contents, "data", &json_data_str)) {
-        HMI_ERROR("HomescreenVoice", "got ev_contents error.");
+        HMI_ERROR("HomescreenVoice", "got data error.");
         return;
     }
 
     struct json_object *json_state;
     struct json_object *json_data = json_tokener_parse(json_object_get_string(json_data_str));
     if(!json_object_object_get_ex(json_data, "state", &json_state)) {
-        HMI_ERROR("HomescreenVoice", "got json_data1 error.");
+        HMI_ERROR("HomescreenVoice", "got state error.");
         return;
     }
 
     const char* info = json_object_get_string(json_state);
-
-    if (strcasecmp(info, HomescreenVoice::state_lists[0].c_str()) == 0) {
-        emit statusChanged(true);
+    const char* eventinfo = json_object_get_string(json_event_str);
+    const char* warnginfo = "Alexa disconnect!";
+    if(strcasecmp(eventinfo, HomescreenVoice::event_lists[0].c_str()) == 0){
+        if (strcasecmp(info, HomescreenVoice::state_lists[0].c_str()) == 0) {
+            if(connect){
+                emit statusChanged(true);
+                emit showInformation(QString(QLatin1String(info)));
+            }
+        }
+        else if ((strcasecmp(info, HomescreenVoice::state_lists[1].c_str()) == 0)||
+                 (strcasecmp(info, HomescreenVoice::state_lists[2].c_str()) == 0)||
+                 (strcasecmp(info, HomescreenVoice::state_lists[3].c_str()) == 0)||
+                 (strcasecmp(info, HomescreenVoice::state_lists[4].c_str()) == 0)){
+            emit statusChanged(false);
+            emit showInformation(QString(QLatin1String(info)));
+        }
+    }else if(strcasecmp(eventinfo, HomescreenVoice::event_lists[1].c_str()) == 0){
+        if (strcasecmp(info, HomescreenVoice::connect_lists[0].c_str()) == 0) {
+            HMI_DEBUG("HomescreenVoice", "connect false!");
+            connect = false;
+            emit showInformation(QString(QLatin1String(warnginfo)));
+        }
+        else if (strcasecmp(info, HomescreenVoice::connect_lists[1].c_str()) == 0){
+            connect = true;
+            emit statusChanged(true);
+        }
     }
-    else if ((strcasecmp(info, HomescreenVoice::state_lists[1].c_str()) == 0)||
-             (strcasecmp(info, HomescreenVoice::state_lists[2].c_str()) == 0)||
-             (strcasecmp(info, HomescreenVoice::state_lists[3].c_str()) == 0)||
-             (strcasecmp(info, HomescreenVoice::state_lists[4].c_str()) == 0)){
-        emit statusChanged(false);
-    }
-
-    emit showInformation(QString(QLatin1String(info)));
 }
 
 /**

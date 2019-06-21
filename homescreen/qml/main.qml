@@ -322,7 +322,7 @@ Window {
         anchors.right: parent.right
         anchors.bottomMargin: 50
         anchors.rightMargin: 0
-        visible: true
+        visible: false
         Image {
             id: voiceimage
             anchors.left: parent.left
