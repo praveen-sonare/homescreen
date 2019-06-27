@@ -34,7 +34,8 @@ SOURCES += \
     src/homescreenhandler.cpp \
     src/toucharea.cpp \
     src/shortcutappmodel.cpp \
-    src/homescreenvoice.cpp
+    src/homescreenvoice.cpp \
+    src/homescreenconnect.cpp
 
 HEADERS  += \
     src/statusbarmodel.h \
@@ -44,7 +45,8 @@ HEADERS  += \
     src/homescreenhandler.h \
     src/toucharea.h \
     src/shortcutappmodel.h \
-    src/homescreenvoice.h
+    src/homescreenvoice.h \
+    src/homescreenconnect.h
 
 OTHER_FILES += \
     README.md

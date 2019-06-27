@@ -142,15 +142,17 @@ Window {
                         container.state = 'fullscreen'
                         touchArea.switchArea(1)
                         homescreenHandler.tapShortcut(appName, true)
-                        container.visible = false
+                        container.opacity = 0.0
                         voiceBtn.visible = false
                     } else {
                         image.source = './images/normal.png'
                         container.state = 'normal'
                         touchArea.switchArea(0)
                         homescreenHandler.tapShortcut(appName, false)
-                        container.visible = true
-                        voiceBtn.visible = true
+                        container.opacity = 1.0
+                        if(voiceBtn.enableVoiceBtn == true){
+                            voiceBtn.visible = true
+                        }
                     }
                 }
             }
@@ -191,7 +193,9 @@ Window {
             image.visible = true
             touchArea.switchArea(0)
             container.opacity = 1.0
-            voiceBtn.visible = true
+            if(voiceBtn.enableVoiceBtn == true){
+                voiceBtn.visible = true
+            }
         }
     }
 
@@ -245,6 +249,15 @@ Window {
 
     Connections {
         target: homescreenVoice
+        onShowInformation: {
+            bottomText.text = info
+            bottomInformation.visible = true
+            informationTimer.restart()
+        }
+    }
+
+    Connections {
+        target: homescreenConnect
         onShowInformation: {
             bottomText.text = info
             bottomInformation.visible = true
@@ -310,7 +323,14 @@ Window {
     Connections {
         target: homescreenVoice
         onStatusChanged: {
-            voiceBtn.visible = status
+            voiceBtn.enableVoiceBtn = status
+            if(voiceBtn.enableVoiceBtn == true){
+                if (container.state === 'normal') {
+                    voiceBtn.visible = true
+                }
+            }else{
+                voiceBtn.visible = false
+            }
         }
     }
 
@@ -323,6 +343,7 @@ Window {
         anchors.bottomMargin: 50
         anchors.rightMargin: 0
         visible: false
+        property bool enableVoiceBtn: false
         Image {
             id: voiceimage
             anchors.left: parent.left

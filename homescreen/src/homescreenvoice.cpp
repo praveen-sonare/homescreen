@@ -223,7 +223,6 @@ void HomescreenVoice::on_event(void *closure, const char *event, struct afb_wsj1
 
     const char* info = json_object_get_string(json_state);
     const char* eventinfo = json_object_get_string(json_event_str);
-    const char* warnginfo = "Alexa disconnect!";
     if(strcasecmp(eventinfo, HomescreenVoice::event_lists[0].c_str()) == 0){
         if (strcasecmp(info, HomescreenVoice::state_lists[0].c_str()) == 0) {
             if(connect){
@@ -242,7 +241,6 @@ void HomescreenVoice::on_event(void *closure, const char *event, struct afb_wsj1
         if (strcasecmp(info, HomescreenVoice::connect_lists[0].c_str()) == 0) {
             HMI_DEBUG("HomescreenVoice", "connect false!");
             connect = false;
-            emit showInformation(QString(QLatin1String(warnginfo)));
         }
         else if (strcasecmp(info, HomescreenVoice::connect_lists[1].c_str()) == 0){
             connect = true;

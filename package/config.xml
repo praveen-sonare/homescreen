@@ -14,6 +14,8 @@
     <param name="windowmanager" value="ws" />
     <param name="ahl-4a" value="ws" />
     <param name="vshl-core" value="ws" />
+    <param name="alexa-voiceagent" value="ws" />
+    <param name="192.168.123.11:4000/carlaclient" value="tcp" />
   </feature>
   <feature name="urn:AGL:widget:required-permission">
     <param name="urn:AGL:permission::public:no-htdocs" value="required" />

@@ -33,6 +33,7 @@
 #include "mastervolume.h"
 #include "homescreenhandler.h"
 #include "homescreenvoice.h"
+#include "homescreenconnect.h"
 #include "toucharea.h"
 #include "shortcutappmodel.h"
 #include "hmi-debug.h"
@@ -102,6 +103,7 @@ int main(int argc, char *argv[])
     HomescreenHandler* homescreenHandler = new HomescreenHandler();
     ShortcutAppModel* shortcutAppModel = new ShortcutAppModel();
     HomescreenVoice* homescreenVoice = new HomescreenVoice();
+    HomescreenConnect* homescreenConnect = new HomescreenConnect();
 
     if(layoutHandler->init(port,token) != 0){
         exit(EXIT_FAILURE);
@@ -126,6 +128,7 @@ int main(int argc, char *argv[])
     TouchArea* touchArea = new TouchArea();
     homescreenHandler->init(port, token.toStdString().c_str(), layoutHandler, graphic_role);
 	homescreenVoice->init(port, token.toStdString().c_str());
+    homescreenConnect->init(port, token.toStdString().c_str());
 
     // mail.qml loading
     QQmlApplicationEngine engine;
@@ -133,6 +136,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("layoutHandler", layoutHandler);
     engine.rootContext()->setContextProperty("homescreenHandler", homescreenHandler);
     engine.rootContext()->setContextProperty("homescreenVoice", homescreenVoice);
+    engine.rootContext()->setContextProperty("homescreenConnect", homescreenConnect);
     engine.rootContext()->setContextProperty("touchArea", touchArea);
     engine.rootContext()->setContextProperty("shortcutAppModel", shortcutAppModel);
     engine.rootContext()->setContextProperty("launcher", launcher);
@@ -188,6 +192,7 @@ int main(int argc, char *argv[])
 
     QObject::connect(homescreenHandler, SIGNAL(shortcutChanged(QString, QString, QString)), shortcutAppModel, SLOT(changeShortcut(QString, QString, QString)));
     QObject::connect(shortcutAppModel, SIGNAL(shortcutUpdated(QString, struct json_object*)), homescreenHandler, SLOT(updateShortcut(QString, struct json_object*)));
+	QObject::connect(window, SIGNAL(frameSwapped()), layoutHandler, SLOT(slotActivateSurface()));
 
     return a.exec();
 }
