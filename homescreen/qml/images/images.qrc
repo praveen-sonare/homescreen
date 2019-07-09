@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/images">
-        <file>TopSection_NoText_NoIcons-01.svg</file>
+        <file>TopSection_NoText_NoIcons-01.png</file>
         <file>Utility_Logo_Background-01.svg</file>
         <file>Utility_Logo_Grey-01.svg</file>
         <file>Utility_Music_Background-01.png</file>

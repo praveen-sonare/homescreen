@@ -30,6 +30,7 @@ static const char API[] = "alexa-voiceagent";
 static const char CARLACLIENTAPI[] = "carlaclient";
 const string vshl_core_event = "{\"events\": []}";
 const string vshl_core_refreshevent = "{\"refresh_token\": \"ws\"}";
+static const int RETRYCOUNT = 60;
 
 const std::vector<std::string> HomescreenConnect::event_lists {
     std::string("alexa-voiceagent/voice_cbl_codepair_received_event"),
@@ -64,6 +65,7 @@ HomescreenConnect::HomescreenConnect(QObject *parent) :
     QObject(parent)
 {
     timer = new QTimer(this);
+    retrytimer = new QTimer(this);
 }
 
 HomescreenConnect::~HomescreenConnect()
@@ -84,6 +86,8 @@ int HomescreenConnect::init(int port, const string& token)
 
     connect(timer,SIGNAL(timeout()),this,SLOT(subscribe()));
     connect(this,SIGNAL(stopTimer()),this,SLOT(stopGetCode()));
+    connect(this,SIGNAL(retryStart()),this,SLOT(startTimer()));
+    connect(retrytimer,SIGNAL(timeout()),this,SLOT(resendCode()));
     if(port > 0 && token.size() > 0)
     {
         mport = port;
@@ -229,8 +233,10 @@ void HomescreenConnect::on_event(void *closure, const char *event, struct afb_ws
                 QString codestr = codestr2.left(6);
                 emit showInformation(QString(QLatin1String(warnginfo)));
                 std::string str = codestr.toStdString();
-                if(send_code(str.c_str())){
-                     HMI_ERROR("HomescreenConnect", "send_code error.");
+                amazonCode = str.c_str();
+                if(send_code(amazonCode)){
+                    emit retryStart();
+                    HMI_ERROR("HomescreenConnect", "send_code error.");
                 }
                 emit stopTimer();
             }
@@ -246,10 +252,32 @@ int HomescreenConnect::send_code(const char *str)
 
     int ret = afb_wsj1_call_j(sp_websock, CARLACLIENTAPI, "set_amazon_code", obj, _on_reply_static, this);
     if (ret < 0) {
-          HMI_ERROR("HomescreenConnect","Failed to call set_amazon_code verb");
+        retrycount++;
+        HMI_ERROR("HomescreenConnect","Failed to call set_amazon_code verb");
+    }else{
+        retrycount = 0;
     }
 
     return ret;
+}
+
+void HomescreenConnect::resendCode(void)
+{
+    HMI_DEBUG("HomescreenConnect"," resendCode,%s",amazonCode);
+    if(send_code(amazonCode)){
+        if(retrycount >= RETRYCOUNT){
+            retrycount = 0;
+            retrytimer->stop();
+            HMI_ERROR("HomescreenConnect", "resend_code 60s timeout.");
+        }
+    }else{
+        retrytimer->stop();
+    }
+}
+
+void HomescreenConnect::startTimer(void)
+{
+    retrytimer->start(1000);
 }
 
 void HomescreenConnect::stopGetCode(void)

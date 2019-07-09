@@ -2,12 +2,12 @@
 <!-- Generator: Adobe Illustrator 21.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 
 <svg
-   xmlns:i="&amp;ns_ai;"
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.1"
@@ -17,84 +17,73 @@
    viewBox="0 0 195 216.8"
    style="enable-background:new 0 0 195 216.8;"
    xml:space="preserve"
-   sodipodi:docname="sdl_usb_active.svg"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"><metadata
-   id="metadata3773"><rdf:RDF><cc:Work
-       rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
-         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs
-   id="defs3771" /><sodipodi:namedview
-   pagecolor="#ffffff"
-   bordercolor="#666666"
-   borderopacity="1"
-   objecttolerance="10"
-   gridtolerance="10"
-   guidetolerance="10"
-   inkscape:pageopacity="0"
-   inkscape:pageshadow="2"
-   inkscape:window-width="1920"
-   inkscape:window-height="1018"
-   id="namedview3769"
-   showgrid="false"
-   inkscape:zoom="3.8560885"
-   inkscape:cx="97.5"
-   inkscape:cy="108.4"
-   inkscape:window-x="-8"
-   inkscape:window-y="-8"
-   inkscape:window-maximized="1"
-   inkscape:current-layer="g3764" />
-<style
-   type="text/css"
-   id="style3750">
-	.st0{fill:#0DF9FF;}
-	.st1{fill:url(#Active_2_1_);}
-	.st2{fill:#FFFFFF;}
-	.st3{font-family:'Roboto-Regular';}
-	.st4{font-size:11px;}
-	.st5{letter-spacing:2;}
-	.st6{fill:url(#SVGID_1_);}
-	.st7{fill:url(#SVGID_2_);}
-	.st8{fill:url(#SVGID_3_);}
-	.st9{fill:url(#SVGID_4_);}
-	.st10{fill:url(#SVGID_5_);}
-</style>
-<switch
-   id="switch3766">
-	<g
-   i:extraneous="self"
-   id="g3764">
-		<rect
-   id="Active_1"
-   y="214.3"
-   transform="matrix(-1 -1.224647e-16 1.224647e-16 -1 195.8833 431.0468)"
-   class="st0"
-   width="195.9"
-   height="2.4" />
-		<linearGradient
-   id="Active_2_1_"
-   gradientUnits="userSpaceOnUse"
-   x1="97.9416"
-   y1="236.9585"
-   x2="97.9416"
-   y2="-68.5304">
-			<stop
-   offset="0"
-   style="stop-color:#0DF9FF"
-   id="stop3753" />
-			<stop
-   offset="9.208472e-02"
-   style="stop-color:#0DF9FF;stop-opacity:0.853"
-   id="stop3755" />
-			<stop
-   offset="0.6264"
-   style="stop-color:#0DF9FF;stop-opacity:0"
-   id="stop3757" />
-		</linearGradient>
-		<rect
-   id="Active_2"
-   class="st1"
-   width="195.9"
-   height="214.3" />
-		
-	</g>
-</switch>
-</svg>
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   sodipodi:docname="blank_active.svg"><metadata
+     id="metadata61"><rdf:RDF><cc:Work
+         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title /></cc:Work></rdf:RDF></metadata><defs
+     id="defs59" /><sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1018"
+     id="namedview57"
+     showgrid="false"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:zoom="2.1771217"
+     inkscape:cx="179.59844"
+     inkscape:cy="95.18051"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="Home"><sodipodi:guide
+       position="52.936865,144.9161"
+       orientation="0,1"
+       id="guide4189"
+       inkscape:locked="false" /><sodipodi:guide
+       position="66.027543,153.29873"
+       orientation="1,0"
+       id="guide4191"
+       inkscape:locked="false" /><sodipodi:guide
+       position="34.449153,79.00339"
+       orientation="0,1"
+       id="guide4193"
+       inkscape:locked="false" /><sodipodi:guide
+       position="132.05509,117.35678"
+       orientation="1,0"
+       id="guide4195"
+       inkscape:locked="false" /><sodipodi:guide
+       position="98.9839,162.94449"
+       orientation="1,0"
+       id="guide4266"
+       inkscape:locked="false" /><sodipodi:guide
+       position="67.290679,111.95975"
+       orientation="0,1"
+       id="guide4268"
+       inkscape:locked="false" /></sodipodi:namedview><style
+     type="text/css"
+     id="style3">
+	.st0{fill:#FFFFFF;}
+	.st1{font-family:'Roboto-Regular';}
+	.st2{font-size:11px;}
+	.st3{letter-spacing:2;}
+	.st4{fill:url(#SVGID_1_);}
+	.st5{fill:url(#SVGID_2_);}
+	.st6{fill:url(#SVGID_3_);}
+	.st7{fill:url(#SVGID_4_);}
+	.st8{fill:url(#SVGID_5_);}
+</style><image
+     width="196"
+     height="11"
+     preserveAspectRatio="none"
+     xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKQAAAAKCAYAAAA6o/XfAAAACXBIWXMAAAsSAAALEgHS3X78AAAA zElEQVRYhe2YSw6DMAxEJw7cozfpVXrkXgfIp3KCwKVRq+68mCdZM/EnEopXBAAPSLwhzoDMQJxO bbkJYdd2tv7ICSCha9xVjDf18KM+nBfTpzmRYW/4UX+b1zv16zWUEIzHwJv+Yd8f88Oey7xSNarR CpTdFxP2nC+1XFFzMbXStUX5ogVIA596rdpzOvPdVyBlIK3Atn5o3ZYzp/7oWTC1hQTuIMQBwkcg nuBCEldwIYkruJDEFVxI4gouJHEFF5K4Qv9DPvkkxAUAXgP7fBBsdQEGAAAAAElFTkSuQmCC "
+     id="image544"
+     x="0"
+     y="179" /></svg>

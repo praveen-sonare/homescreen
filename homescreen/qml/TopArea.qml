@@ -22,7 +22,7 @@ import QtQuick.Controls 2.0
 Image {
     width: 1920
     height: 218
-    source: './images/TopSection_NoText_NoIcons-01.svg'
+    source: './images/TopSection_NoText_NoIcons-01.png'
     fillMode: Image.PreserveAspectCrop
 
     RowLayout {

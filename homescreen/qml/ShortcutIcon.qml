@@ -67,6 +67,10 @@ MouseArea {
         }
         Image {
             id: sourceIcon
+            anchors.topMargin: 21
+            anchors.bottomMargin: 41
+            anchors.leftMargin: 30
+            anchors.rightMargin: 30
             anchors.fill: parent
             source: isBlank ? null : root.icon
         }
@@ -79,18 +83,18 @@ MouseArea {
         }
     }
 
-    Label {
-        id: name
-        y: 160
-        width: root.width - 10
-        font.pixelSize: 15
-        font.letterSpacing: 5
-        // wrapMode: Text.WordWrap
-        anchors.horizontalCenter: parent.horizontalCenter
-        horizontalAlignment: Text.AlignHCenter
-        color: "white"
-        text: qsTr((root.name === "launcher" ? "home" : root.name).toUpperCase())
-    }
+//    Label {
+//        id: name
+//        y: 160
+//        width: root.width - 10
+//        font.pixelSize: 15
+//        font.letterSpacing: 5
+//        // wrapMode: Text.WordWrap
+//        anchors.horizontalCenter: parent.horizontalCenter
+//        horizontalAlignment: Text.AlignHCenter
+//        color: "white"
+//        text: qsTr((root.name === "launcher" ? "home" : root.name).toUpperCase())
+//    }
 
     states: [
         State {

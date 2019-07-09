@@ -51,9 +51,12 @@ signals:
     void statusChanged(bool status);
     void showInformation(QString info);
     void stopTimer(void);
+    void retryStart(void);
 private slots:
     void subscribe(void);
     void stopGetCode(void);
+    void resendCode(void);
+    void startTimer(void);
 
 private:
     int initialize_websocket(void);
@@ -65,7 +68,10 @@ private:
     std::string muri;
     int mport = 2000;
     std::string mtoken = "hs";
+    const char *amazonCode;
     QTimer *timer;
+    QTimer *retrytimer;
+    int retrycount;
 };
 
 #endif // HOMESCREENCONNECT_H
