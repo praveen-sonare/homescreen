@@ -47,7 +47,8 @@ void MasterVolume::setVolume(qint32 volume)
 		m_volume = volume;
 		QJsonObject arg;
 		arg.insert("control", "Master");
-		arg.insert("value", volume);
+		double v = (double) volume / 100.0;
+		arg.insert("value", v);
 		m_client.call("audiomixer", "volume", arg);
 	}
 }

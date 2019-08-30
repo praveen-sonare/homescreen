@@ -87,7 +87,7 @@ Image {
             font.pixelSize: 36
             anchors.horizontalCenter: parent.horizontalCenter
             color: "white"
-            text: qsTr("Active Volume")
+            text: qsTr("Master Volume")
         }
 
         RowLayout {
