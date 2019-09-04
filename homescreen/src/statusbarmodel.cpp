@@ -33,6 +33,7 @@ public:
     StatusBarServer server;
     QString iconList[StatusBarServer::SupportedCount];
     Network *network;
+    WifiAdapter *wifi_a;
 };
 
 StatusBarModel::Private::Private(StatusBarModel *parent)
@@ -67,12 +68,17 @@ void StatusBarModel::init(QUrl &url, QQmlContext *context)
 {
     d->network = new Network(url, context);
     context->setContextProperty("network", d->network);
+    d->wifi_a = static_cast<WifiAdapter*>(d->network->findAdapter("wifi"));
+    Q_CHECK_PTR(d->wifi_a);
 
-    QObject::connect(d->network, &Network::wifiConnectedChanged, this, &StatusBarModel::onWifiConnectedChanged);
-    QObject::connect(d->network, &Network::wifiEnabledChanged, this, &StatusBarModel::onWifiEnabledChanged);
-    QObject::connect(d->network, &Network::wifiStrengthChanged, this, &StatusBarModel::onWifiStrengthChanged);
+    QObject::connect(d->wifi_a, &WifiAdapter::wifiConnectedChanged,
+		     this, &StatusBarModel::onWifiConnectedChanged);
+    QObject::connect(d->wifi_a, &WifiAdapter::wifiEnabledChanged,
+		     this, &StatusBarModel::onWifiEnabledChanged);
+    QObject::connect(d->wifi_a, &WifiAdapter::wifiStrengthChanged,
+		     this, &StatusBarModel::onWifiStrengthChanged);
 
-    setWifiStatus(d->network->wifiConnected(), d->network->wifiEnabled(), d->network->wifiStrength());
+    setWifiStatus(d->wifi_a->wifiConnected(), d->wifi_a->wifiEnabled(), d->wifi_a->wifiStrength());
 }
 
 void StatusBarModel::setWifiStatus(bool connected, bool enabled, int strength)
@@ -92,18 +98,18 @@ void StatusBarModel::setWifiStatus(bool connected, bool enabled, int strength)
 
 void StatusBarModel::onWifiConnectedChanged(bool connected)
 {
-    setWifiStatus(connected, d->network->wifiEnabled(), d->network->wifiStrength());
+    setWifiStatus(connected, d->wifi_a->wifiEnabled(), d->wifi_a->wifiStrength());
 }
 
 void StatusBarModel::onWifiEnabledChanged(bool enabled)
 {
-    setWifiStatus(d->network->wifiConnected(), enabled, d->network->wifiStrength());
+    setWifiStatus(d->wifi_a->wifiConnected(), enabled, d->wifi_a->wifiStrength());
 }
 
 void StatusBarModel::onWifiStrengthChanged(int strength)
 {
     qInfo() << "Strength changed: " << strength;
-    setWifiStatus(d->network->wifiConnected(), d->network->wifiEnabled(), strength);
+    setWifiStatus(d->wifi_a->wifiConnected(), d->wifi_a->wifiEnabled(), strength);
 }
 
 int StatusBarModel::rowCount(const QModelIndex &parent) const
