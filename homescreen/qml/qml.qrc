@@ -1,6 +1,9 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
+        <file>background.qml</file>
+        <file>toppanel.qml</file>
+        <file>bottompanel.qml</file>
         <file>MediaArea.qml</file>
         <file>MediaAreaBlank.qml</file>
         <file>MediaAreaMusic.qml</file>

@@ -22,8 +22,6 @@ import HomeScreen 1.0
 
 Item {
     id: root
-    width: 295
-    height: 218
 
     property date now: new Date
     Timer {
@@ -58,48 +56,71 @@ Item {
     RowLayout {
         anchors.fill: parent
         spacing: 0
-        Item {
+
+        ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.preferredWidth: 295 - 76
+            Layout.preferredWidth: 217
+            spacing: 0
+
             ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 40
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredHeight: 130
                 spacing: 0
-                Text {
+
+                Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    text: Qt.formatDate(now, 'dddd').toUpperCase()
-                    font.family: 'Roboto'
-                    font.pixelSize: 13
-                    color: 'white'
-                    verticalAlignment:  Text.AlignVCenter
-//                    Rectangle {
-//                        anchors.fill: parent
-//                        anchors.margins: 5
-//                        color: 'red'
-//                        border.color: 'blue'
-//                        border.width: 1
-//                        z: -1
-//                    }
+                    Layout.preferredHeight: 70
+
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.left: parent.left
+                        anchors.leftMargin: parent.width * 0.2
+
+                        text: Qt.formatDate(now, 'dddd').toUpperCase()
+                        font.family: 'Roboto'
+                        font.pixelSize: 13
+                        color: 'white'
+                        verticalAlignment:  Text.AlignVCenter
+                        fontSizeMode: Text.Fit
+                    }
                 }
-                Text {
+                Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    text: Qt.formatTime(now, 'h:mm ap').toUpperCase()
-                    font.family: 'Roboto'
-                    font.pixelSize: 40
-                    color: 'white'
-                    horizontalAlignment:  Text.AlignHCenter
-                    verticalAlignment:  Text.AlignVCenter
+                    Layout.preferredHeight: 60
+
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: parent.height * 0.05
+
+                        text: Qt.formatTime(now, 'h:mm ap').toUpperCase()
+                        font.family: 'Roboto'
+                        font.pixelSize: 40
+                        color: 'white'
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        fontSizeMode: Text.Fit
+                    }
                 }
+            }
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredHeight: 82
+
                 RowLayout {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.preferredHeight: 20
+                    anchors.top: parent.top
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.topMargin: parent.height * 0.1
+
                     Image {
                         id: condition_item
                         source: './images/Weather/WeatherIcons_Rain-01.png'
+                        fillMode: Image.PreserveAspectFit
                     }
                     Text {
                         id: temperature_item
@@ -107,6 +128,8 @@ Item {
                         color: 'white'
                         font.family: 'Helvetica'
                         font.pixelSize: 32
+                        fontSizeMode: Text.Fit
+                        verticalAlignment: Text.AlignVCenter
                     }
                 }
             }
@@ -115,13 +138,14 @@ Item {
             id: icons
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.preferredWidth: 76
+            Layout.preferredWidth: 74
             spacing: -10
 
             Image {
                 id: bt_icon
-                Layout.preferredWidth: 77
-                Layout.preferredHeight: 73
+                Layout.preferredHeight: 70
+                Layout.fillWidth: true
+                Layout.fillHeight: true
                 source: connStatus ? './images/Status/HMI_Status_Bluetooth_On-01.png' : './images/Status/HMI_Status_Bluetooth_Inactive-01.png'
                 fillMode: Image.PreserveAspectFit
                 property string deviceName: "none"
@@ -137,8 +161,9 @@ Item {
             Repeater {
                 model: StatusBarModel { objectName: "statusBar" }
                 delegate: Image {
-                    Layout.preferredWidth: 77
-                    Layout.preferredHeight: 73
+                    Layout.preferredHeight: 70
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
                     source: model.modelData
                     fillMode: Image.PreserveAspectFit
                 }

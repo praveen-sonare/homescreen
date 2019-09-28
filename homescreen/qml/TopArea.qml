@@ -20,10 +20,10 @@ import QtQuick.Layouts 1.1
 import QtQuick.Controls 2.0
 
 Image {
-    width: 1920
-    height: 218
+    anchors.fill: parent
     source: './images/TopSection_NoText_NoIcons-01.svg'
-    fillMode: Image.PreserveAspectCrop
+    //fillMode: Image.PreserveAspectCrop
+    fillMode: Image.Stretch
 
     RowLayout {
         anchors.fill: parent
@@ -32,13 +32,13 @@ Image {
             id: shortcutArea
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.preferredWidth: 785
+            Layout.preferredWidth: 775
         }
         StatusArea {
             id: statusArea
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.preferredWidth: 295
+            Layout.preferredWidth: 291
         }
     }
 

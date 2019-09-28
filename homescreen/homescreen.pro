@@ -15,12 +15,10 @@
 
 TEMPLATE = app
 TARGET = HomeScreen
-QT = qml quick dbus websockets
-CONFIG += c++11 link_pkgconfig
+QT = qml quick dbus websockets gui-private
+CONFIG += c++11 link_pkgconfig wayland-scanner
 DESTDIR = $${OUT_PWD}/../package/root/bin
-PKGCONFIG += qlibwindowmanager qtappfw afb-helpers-qt
-
-LIBS += -lhomescreen
+PKGCONFIG += qtappfw afb-helpers-qt wayland-client
 
 include(../interfaces/interfaces.pri)
 
@@ -29,15 +27,16 @@ SOURCES += \
     src/statusbarmodel.cpp \
     src/statusbarserver.cpp \
     src/applicationlauncher.cpp \
-    src/mastervolume.cpp \
-    src/homescreenhandler.cpp
+    src/mastervolume.cpp
+
+WAYLANDCLIENTSOURCES += \
+    protocol/agl-shell.xml
 
 HEADERS  += \
     src/statusbarmodel.h \
     src/statusbarserver.h \
     src/applicationlauncher.h \
-    src/mastervolume.h \
-    src/homescreenhandler.h
+    src/mastervolume.h
 
 OTHER_FILES += \
     README.md

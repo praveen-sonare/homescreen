@@ -20,18 +20,25 @@
 #include <QtGui/QGuiApplication>
 #include <QtQml/QQmlApplicationEngine>
 #include <QtQml/QQmlContext>
+#include <QtQml/QQmlComponent>
 #include <QtQml/qqml.h>
 #include <QQuickWindow>
+#include <QScreen>
+#include <qpa/qplatformnativeinterface.h>
 
-#include <qlibwindowmanager.h>
+#include <cstdlib>
+#include <cstring>
+#include <wayland-client.h>
+
 #include <weather.h>
 #include <bluetooth.h>
 #include "applicationlauncher.h"
 #include "statusbarmodel.h"
 #include "afm_user_daemon_proxy.h"
 #include "mastervolume.h"
-#include "homescreenhandler.h"
 #include "hmi-debug.h"
+
+#include "wayland-agl-shell-client-protocol.h"
 
 // XXX: We want this DBus connection to be shared across the different
 // QML objects, is there another way to do this, a nice way, perhaps?
@@ -46,15 +53,58 @@ struct Cleanup {
     }
 };
 
-void noOutput(QtMsgType, const QMessageLogContext &, const QString &)
-{
 }
 
+static void global_add(void *data, struct wl_registry *reg, uint32_t name,
+                       const char *interface, uint32_t)
+{
+    struct agl_shell **shell = static_cast<struct agl_shell **>(data);
+    if (strcmp(interface, agl_shell_interface.name) == 0) {
+        *shell = static_cast<struct agl_shell *>(wl_registry_bind(reg, name, &agl_shell_interface, 1));
+    }
+}
+
+static void global_remove(void *, struct wl_registry *, uint32_t)
+{
+    // Don't care
+}
+
+static const struct wl_registry_listener registry_listener = {
+    global_add,
+    global_remove,
+};
+
+static struct wl_surface *create_component(QPlatformNativeInterface *native,
+                                           QQmlComponent *comp, QScreen *screen)
+{
+        QObject *obj = comp->create();
+        obj->setParent(screen);
+
+        QWindow *win = qobject_cast<QWindow *>(obj);
+        return static_cast<struct wl_surface *>(native->nativeResourceForWindow("surface", win));
 }
 
 int main(int argc, char *argv[])
 {
+    setenv("QT_QPA_PLATFORM", "wayland", 1);
     QGuiApplication a(argc, argv);
+	QPlatformNativeInterface *native = qApp->platformNativeInterface();
+    struct wl_display *wl;
+    struct wl_registry *registry;
+    struct agl_shell *agl_shell = nullptr;
+
+	wl = static_cast<struct wl_display *>(native->nativeResourceForIntegration("display"));
+    registry = wl_display_get_registry(wl);
+
+    wl_registry_add_listener(registry, &registry_listener, &agl_shell);
+    // Roundtrip to get all globals advertised by the compositor
+    wl_display_roundtrip(wl);
+    wl_registry_destroy(registry);
+    
+    if (!agl_shell) {
+        qFatal("Compositor does not support AGL shell protocol");
+        return 1;
+    }
 
     // use launch process
     QScopedPointer<org::AGL::afm::user, Cleanup> afm_user_daemon_proxy(new org::AGL::afm::user("org.AGL.afm.user",
@@ -93,34 +143,6 @@ int main(int argc, char *argv[])
     qmlRegisterType<MasterVolume>("MasterVolume", 1, 0, "MasterVolume");
 
     ApplicationLauncher *launcher = new ApplicationLauncher();
-    QLibWindowmanager* layoutHandler = new QLibWindowmanager();
-    if(layoutHandler->init(port,token) != 0){
-        exit(EXIT_FAILURE);
-    }
-
-    AGLScreenInfo screenInfo(layoutHandler->get_scale_factor());
-
-    if (layoutHandler->requestSurface(graphic_role) != 0) {
-        exit(EXIT_FAILURE);
-    }
-
-    layoutHandler->set_event_handler(QLibWindowmanager::Event_SyncDraw, [layoutHandler, &graphic_role](json_object *object) {
-        layoutHandler->endDraw(graphic_role);
-    });
-
-    layoutHandler->set_event_handler(QLibWindowmanager::Event_ScreenUpdated, [layoutHandler, launcher](json_object *object) {
-        json_object *jarray = json_object_object_get(object, "ids");
-        int arrLen = json_object_array_length(jarray);
-        for( int idx = 0; idx < arrLen; idx++)
-        {
-            QString label = QString(json_object_get_string(	json_object_array_get_idx(jarray, idx) ));
-            HMI_DEBUG("HomeScreen","Event_ScreenUpdated application: %s.", label.toStdString().c_str());
-            QMetaObject::invokeMethod(launcher, "setCurrent", Qt::QueuedConnection, Q_ARG(QString, label));
-        }
-    });
-
-    HomescreenHandler* homescreenHandler = new HomescreenHandler();
-    homescreenHandler->init(port, token.toStdString().c_str());
 
     QUrl bindingAddress;
     bindingAddress.setScheme(QStringLiteral("ws"));
@@ -132,24 +154,62 @@ int main(int argc, char *argv[])
     query.addQueryItem(QStringLiteral("token"), token);
     bindingAddress.setQuery(query);
 
+#if 0
     // mail.qml loading
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("bindingAddress", bindingAddress);
-    engine.rootContext()->setContextProperty("layoutHandler", layoutHandler);
-    engine.rootContext()->setContextProperty("homescreenHandler", homescreenHandler);
     engine.rootContext()->setContextProperty("launcher", launcher);
     engine.rootContext()->setContextProperty("weather", new Weather(bindingAddress));
     engine.rootContext()->setContextProperty("bluetooth", new Bluetooth(bindingAddress, engine.rootContext()));
-    engine.rootContext()->setContextProperty("screenInfo", &screenInfo);
+    //engine.rootContext()->setContextProperty("screenInfo", &screenInfo);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+    engine.load(QUrl(QStringLiteral("qrc:/background.qml")));
 
+    auto root_objects = engine.rootObjects();
+    printf("num root objects: %d\n", root_objects.length());
     QObject *root = engine.rootObjects().first();
     QQuickWindow *window = qobject_cast<QQuickWindow *>(root);
-    QObject::connect(window, SIGNAL(frameSwapped()), layoutHandler, SLOT(slotActivateSurface()));
+
+    for (auto o : root_objects) {
+	    qDebug() << o->dynamicPropertyNames();
+    }
 
     QList<QObject *> sobjs = engine.rootObjects();
     StatusBarModel *statusBar = sobjs.first()->findChild<StatusBarModel *>("statusBar");
     statusBar->init(bindingAddress, engine.rootContext());
+#endif
+
+    QQmlEngine engine;
+    QQmlContext *context = engine.rootContext();
+    context->setContextProperty("bindingAddress", bindingAddress);
+    context->setContextProperty("launcher", launcher);
+    context->setContextProperty("weather", new Weather(bindingAddress));
+    context->setContextProperty("bluetooth", new Bluetooth(bindingAddress, engine.rootContext()));
+
+    QQmlComponent bg_comp(&engine, QUrl("qrc:/background.qml"));
+    QQmlComponent top_comp(&engine, QUrl("qrc:/toppanel.qml"));
+    QQmlComponent bot_comp(&engine, QUrl("qrc:/bottompanel.qml"));
+
+    for (QScreen *screen : qApp->screens()) {
+        struct wl_output *output;
+
+        output = static_cast<struct wl_output *>(native->nativeResourceForScreen("output", screen));
+
+        struct wl_surface *bg = create_component(native, &bg_comp, screen);
+        agl_shell_set_background(agl_shell, bg, output);
+
+        struct wl_surface *top = create_component(native, &top_comp, screen);
+        agl_shell_set_panel(agl_shell, top, output, AGL_SHELL_EDGE_TOP);
+
+        struct wl_surface *bot = create_component(native, &bot_comp, screen);
+        agl_shell_set_panel(agl_shell, bot, output, AGL_SHELL_EDGE_BOTTOM);
+    }
+
+    // Delay the ready signal until after Qt has done all of its own setup in a.exec()
+	QTimer::singleShot(0, [agl_shell](){
+        agl_shell_ready(agl_shell);
+        agl_shell_destroy(agl_shell);
+    });
 
     return a.exec();
 }
