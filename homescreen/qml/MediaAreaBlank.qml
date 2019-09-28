@@ -22,8 +22,7 @@ import AGL.Demo.Controls 1.0
 import MasterVolume 1.0
 
 Image {
-    width: 1080
-    height: 215
+    anchors.fill: parent
     source: './images/Utility_Logo_Background-01.svg'
     property bool displayVolume: false;
 
@@ -40,7 +39,7 @@ Image {
     }
 
     Image {
-    id: logo_image
+        id: logo_image
         anchors.centerIn: parent
         source: './images/Utility_Logo_Grey-01.svg'
     }

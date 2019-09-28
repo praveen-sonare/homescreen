@@ -16,23 +16,20 @@
  */
 
 import QtQuick 2.2
-import QtQuick.Window 2.1
+import QtQuick.Window 2.13
 import QtQuick.Layouts 1.1
 import HomeScreen 1.0
 
 Window {
     visible: true
     flags: Qt.FramelessWindowHint
-    width: container.width * container.scale
-    height: container.height * container.scale
+    width: Screen.width
+    height: Screen.height
     title: 'HomeScreen'
 
     Image {
         id: container
-        anchors.centerIn: parent
-        width: 1080
-        height: 1920
-        scale: screenInfo.scale_factor()
+        anchors.fill: parent
         source: './images/AGL_HMI_Blue_Background_NoCar-01.png'
 
         ColumnLayout {
@@ -90,16 +87,7 @@ Window {
         }
     }
 
-    Connections {
-        target: homescreenHandler
-        onShowInformation: {
-            bottomText.text = info
-            bottomInformation.visible = true
-            informationTimer.restart()
-        }
-    }
-
-	Timer {
+    Timer {
         id:notificationTimer
         interval: 3000
         running: false
@@ -141,16 +129,6 @@ Window {
                 color: "white"
                 text: qsTr("")
             }
-        }
-    }
-
-    Connections {
-        target: homescreenHandler
-        onShowNotification: {
-            notificationIcon.source = icon_path
-            notificationtext.text = text
-            notificationItem.visible = true
-            notificationTimer.restart()
         }
     }
 }

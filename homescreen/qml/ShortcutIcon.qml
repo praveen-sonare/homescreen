@@ -21,8 +21,6 @@ import QtGraphicalEffects 1.0
 
 MouseArea {
     id: root
-    width: 195
-    height: 216.8
     property string name: 'Home'
     property bool active: false
     Item {
@@ -32,12 +30,14 @@ MouseArea {
         Image {
             id: inactiveIcon
             anchors.fill: parent
-                     source: './images/Shortcut/%1.svg'.arg(root.name.toLowerCase())
+            source: './images/Shortcut/%1.svg'.arg(root.name.toLowerCase())
+            fillMode: Image.PreserveAspectFit
         }
         Image {
             id: activeIcon
             anchors.fill: parent
             source: './images/Shortcut/%1_active.svg'.arg(root.name.toLowerCase())
+            fillMode: Image.PreserveAspectFit
             opacity: 0.0
         }
         layer.enabled: true
@@ -49,12 +49,13 @@ MouseArea {
     }
     Label {
         id: name
-        y: 160
         width: root.width - 10
         font.pixelSize: 15
         font.letterSpacing: 5
         // wrapMode: Text.WordWrap
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.centerIn: icon
+        anchors.verticalCenterOffset: icon.height * 0.2
+        //anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
         color: "white"
         text: qsTr(model.name.toUpperCase())

@@ -21,9 +21,6 @@ import QtQuick.Layouts 1.1
 
 Item {
     id: root
-    width: 785
-    height: 218
-
 
     ListModel {
         id: applicationModel
@@ -53,7 +50,7 @@ Item {
 
     RowLayout {
         anchors.fill: parent
-        spacing: 2
+        spacing: 0
         Repeater {
             model: applicationModel
             delegate: ShortcutIcon {
