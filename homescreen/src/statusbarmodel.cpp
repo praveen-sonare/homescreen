@@ -17,9 +17,6 @@
 
 #include "statusbarmodel.h"
 #include "statusbarserver.h"
-
-#include <QtDBus/QDBusConnection>
-
 #include "network.h"
 
 class StatusBarModel::Private
@@ -39,9 +36,6 @@ public:
 StatusBarModel::Private::Private(StatusBarModel *parent)
     : q(parent)
 {
-    QDBusConnection dbus = QDBusConnection::sessionBus();
-    dbus.registerObject("/StatusBar", &server);
-    dbus.registerService("org.agl.homescreen");
     connect(&server, &StatusBarServer::statusIconChanged, [&](int placeholderIndex, const QString &icon) {
         if (placeholderIndex < 0 || StatusBarServer::SupportedCount <= placeholderIndex) return;
         if (iconList[placeholderIndex] == icon) return;

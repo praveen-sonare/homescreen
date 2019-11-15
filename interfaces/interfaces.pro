@@ -25,8 +25,7 @@ SOURCES += \
 
 XMLSOURCES = \
     afm_user_daemon.xml \
-    appframework.xml \
-    statusbar.xml
+    appframework.xml
 
 gen_adaptor_cpp.input = XMLSOURCES
 gen_adaptor_cpp.commands = \
