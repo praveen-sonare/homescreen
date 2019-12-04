@@ -209,6 +209,8 @@ int main(int argc, char *argv[])
         agl_shell_set_panel(agl_shell, bot, output, AGL_SHELL_EDGE_BOTTOM);
     }
 
+    wl_display_dispatch(wl);
+
     // Delay the ready signal until after Qt has done all of its own setup in a.exec()
     QTimer::singleShot(0, [shell](){
         agl_shell_ready(shell.get());
