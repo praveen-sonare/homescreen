@@ -28,6 +28,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <memory>
 #include <wayland-client.h>
 
 #include <weather.h>
@@ -36,6 +37,7 @@
 #include "statusbarmodel.h"
 #include "afm_user_daemon_proxy.h"
 #include "mastervolume.h"
+#include "shell.h"
 #include "hmi-debug.h"
 
 #include "wayland-agl-shell-client-protocol.h"
@@ -77,34 +79,35 @@ static const struct wl_registry_listener registry_listener = {
 static struct wl_surface *create_component(QPlatformNativeInterface *native,
                                            QQmlComponent *comp, QScreen *screen)
 {
-        QObject *obj = comp->create();
-        obj->setParent(screen);
+    QObject *obj = comp->create();
+    obj->setParent(screen);
 
-        QWindow *win = qobject_cast<QWindow *>(obj);
-        return static_cast<struct wl_surface *>(native->nativeResourceForWindow("surface", win));
+    QWindow *win = qobject_cast<QWindow *>(obj);
+    return static_cast<struct wl_surface *>(native->nativeResourceForWindow("surface", win));
 }
 
 int main(int argc, char *argv[])
 {
     setenv("QT_QPA_PLATFORM", "wayland", 1);
     QGuiApplication a(argc, argv);
-	QPlatformNativeInterface *native = qApp->platformNativeInterface();
+    QPlatformNativeInterface *native = qApp->platformNativeInterface();
     struct wl_display *wl;
     struct wl_registry *registry;
     struct agl_shell *agl_shell = nullptr;
 
-	wl = static_cast<struct wl_display *>(native->nativeResourceForIntegration("display"));
+    wl = static_cast<struct wl_display *>(native->nativeResourceForIntegration("display"));
     registry = wl_display_get_registry(wl);
 
     wl_registry_add_listener(registry, &registry_listener, &agl_shell);
     // Roundtrip to get all globals advertised by the compositor
     wl_display_roundtrip(wl);
     wl_registry_destroy(registry);
-    
+
     if (!agl_shell) {
         qFatal("Compositor does not support AGL shell protocol");
         return 1;
     }
+    std::shared_ptr<struct agl_shell> shell{agl_shell, agl_shell_destroy};
 
     // use launch process
     QScopedPointer<org::AGL::afm::user, Cleanup> afm_user_daemon_proxy(new org::AGL::afm::user("org.AGL.afm.user",
@@ -171,7 +174,7 @@ int main(int argc, char *argv[])
     QQuickWindow *window = qobject_cast<QQuickWindow *>(root);
 
     for (auto o : root_objects) {
-	    qDebug() << o->dynamicPropertyNames();
+        qDebug() << o->dynamicPropertyNames();
     }
 
     QList<QObject *> sobjs = engine.rootObjects();
@@ -185,6 +188,7 @@ int main(int argc, char *argv[])
     context->setContextProperty("launcher", launcher);
     context->setContextProperty("weather", new Weather(bindingAddress));
     context->setContextProperty("bluetooth", new Bluetooth(bindingAddress, engine.rootContext()));
+    context->setContextProperty("shell", new Shell(shell, &a));
 
     QQmlComponent bg_comp(&engine, QUrl("qrc:/background.qml"));
     QQmlComponent top_comp(&engine, QUrl("qrc:/toppanel.qml"));
@@ -206,9 +210,8 @@ int main(int argc, char *argv[])
     }
 
     // Delay the ready signal until after Qt has done all of its own setup in a.exec()
-	QTimer::singleShot(0, [agl_shell](){
-        agl_shell_ready(agl_shell);
-        agl_shell_destroy(agl_shell);
+    QTimer::singleShot(0, [shell](){
+        agl_shell_ready(shell.get());
     });
 
     return a.exec();

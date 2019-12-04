@@ -27,7 +27,8 @@ SOURCES += \
     src/statusbarmodel.cpp \
     src/statusbarserver.cpp \
     src/applicationlauncher.cpp \
-    src/mastervolume.cpp
+    src/mastervolume.cpp \
+    src/shell.cpp
 
 WAYLANDCLIENTSOURCES += \
     protocol/agl-shell.xml
@@ -36,7 +37,8 @@ HEADERS  += \
     src/statusbarmodel.h \
     src/statusbarserver.h \
     src/applicationlauncher.h \
-    src/mastervolume.h
+    src/mastervolume.h \
+    src/shell.h
 
 OTHER_FILES += \
     README.md

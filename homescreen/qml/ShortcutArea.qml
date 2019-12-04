@@ -18,6 +18,7 @@
 
 import QtQuick 2.2
 import QtQuick.Layouts 1.1
+import QtQuick.Window 2.2
 
 Item {
     id: root
@@ -25,7 +26,7 @@ Item {
     ListModel {
         id: applicationModel
         ListElement {
-            appid: 'launcher'
+            appid: "launcher"
             name: 'launcher'
             application: 'launcher@0.1'
         }
@@ -59,7 +60,7 @@ Item {
                 name: model.name
                 active: model.name === launcher.current
                 onClicked: {
-                    homescreenHandler.tapShortcut(model.appid)
+                    shell.activate_app(Window.window, model.appid)
                 }
             }
         }
