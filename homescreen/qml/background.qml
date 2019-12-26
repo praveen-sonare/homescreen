@@ -1,5 +1,5 @@
-import QtQuick 2.13
-import QtQuick.Window 2.13
+import QtQuick 2.11
+import QtQuick.Window 2.11
 
 Window {
     id: background
