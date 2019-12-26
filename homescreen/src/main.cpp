@@ -200,13 +200,14 @@ int main(int argc, char *argv[])
         output = static_cast<struct wl_output *>(native->nativeResourceForScreen("output", screen));
 
         struct wl_surface *bg = create_component(native, &bg_comp, screen);
-        agl_shell_set_background(agl_shell, bg, output);
-
         struct wl_surface *top = create_component(native, &top_comp, screen);
-        agl_shell_set_panel(agl_shell, top, output, AGL_SHELL_EDGE_TOP);
-
         struct wl_surface *bot = create_component(native, &bot_comp, screen);
+
+	wl_display_dispatch(wl);
+
+        agl_shell_set_panel(agl_shell, top, output, AGL_SHELL_EDGE_TOP);
         agl_shell_set_panel(agl_shell, bot, output, AGL_SHELL_EDGE_BOTTOM);
+        agl_shell_set_background(agl_shell, bg, output);
     }
 
     // Delay the ready signal until after Qt has done all of its own setup in a.exec()
