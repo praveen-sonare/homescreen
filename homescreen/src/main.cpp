@@ -191,8 +191,13 @@ int main(int argc, char *argv[])
     context->setContextProperty("shell", new Shell(shell, &a));
 
     QQmlComponent bg_comp(&engine, QUrl("qrc:/background.qml"));
+    qInfo() << bg_comp.errors();
+
     QQmlComponent top_comp(&engine, QUrl("qrc:/toppanel.qml"));
+    qInfo() << top_comp.errors();
+
     QQmlComponent bot_comp(&engine, QUrl("qrc:/bottompanel.qml"));
+    qInfo() << bot_comp.errors();
 
     for (QScreen *screen : qApp->screens()) {
         struct wl_output *output;
