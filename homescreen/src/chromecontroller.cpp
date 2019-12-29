@@ -64,6 +64,11 @@ ChromeController::ChromeController(const QUrl &bindingUrl, QObject *parent) :
                             continue;
                         if (agentId.compare(agentIt.value().toString()) == 0) {
                             agentFound = true;
+                            auto nameIt = agentObj.find(vshl::NAME_TAG);
+                            if (nameIt != agentObj.constEnd()) {
+                                m_voiceAgentName = nameIt.value().toString();
+                                emit agentNameChanged();
+                            }
                             break;
                         }
                     }

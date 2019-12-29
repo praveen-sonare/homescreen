@@ -2,5 +2,6 @@
     <qresource prefix="/images/SpeechChrome">
         <file>bar.png</file>
         <file>push_to_talk.svg</file>
+        <file>push_to_talk_alexa.png</file>
     </qresource>
 </RCC>

@@ -7,6 +7,7 @@ Item {
     clip: true
 
     property bool agentPresent: speechChromeController.agentPresent
+    property string agentName: speechChromeController.agentName
 
     visible: agentPresent
 
@@ -33,7 +34,7 @@ Item {
         anchors.left: parent.left
         anchors.leftMargin: parent.width / 128
         anchors.verticalCenter: parent.verticalCenter
-        source: "./images/SpeechChrome/push_to_talk.svg"
+        source: agentName === "Alexa" ? "./images/SpeechChrome/push_to_talk_alexa.png" : "./images/SpeechChrome/push_to_talk.svg"
 
         MouseArea {
             anchors.fill: parent
