@@ -116,7 +116,7 @@ ChromeController::ChromeController(const QUrl &bindingUrl, QObject *parent) :
     connect(m_aglSocket, &AglSocketWrapper::eventReceived,
             this, [this](const QString &eventName, const QJsonValue &data) -> void {
         if (eventName.compare(vshl::VOICE_DIALOG_STATE_EVENT + m_voiceAgentId) == 0) {
-            const QJsonObject dataObj = QJsonDocument::fromJson(data.toString().toUtf8()).object();
+            const QJsonObject dataObj = data.toObject();
             auto objIt = dataObj.find(vshl::STATE_TAG);
             if (objIt == dataObj.constEnd()) {
                 qWarning() << "Voice dialog state event state missing.";
