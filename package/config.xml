@@ -7,11 +7,9 @@
   <author>TOYOTA</author>
   <license>APL 2.0</license>
   <feature name="urn:AGL:widget:required-api">
-    <param name="homescreen" value="ws" />
     <param name="network-manager" value="ws" />
     <param name="weather" value="ws" />
     <param name="Bluetooth-Manager" value="ws" />
-    <param name="windowmanager" value="ws" />
     <param name="audiomixer" value="ws" />
   </feature>
   <feature name="urn:AGL:widget:required-permission">
