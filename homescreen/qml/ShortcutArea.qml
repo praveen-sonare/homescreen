@@ -47,7 +47,44 @@ Item {
         }
     }
 
-    property int pid: -1
+	property int pid: -1
+
+	property string current_appid: ''
+	property variant current_window: {}
+
+	property variant applications: {'' : -1}
+
+	function find_app(app, apps) {
+		for (var x in apps) {
+
+			if (apps[x] == -1)
+				continue
+
+			if (x === app)
+				return true
+		}
+		return false
+	}
+
+	function set_current_window_app(appid, window) {
+		current_appid = appid
+		current_window = window
+	}
+
+
+    Timer {
+	id: timer
+	interval: 500
+	running: false
+	repeat: false
+	onTriggered: {
+		if (current_appid != '' && current_window != undefined) {
+			console.log("Timer expired, switching to " + current_appid)
+			shell.activate_app(current_window, current_appid)
+		}
+	}
+    }
+
 
     RowLayout {
         anchors.fill: parent
@@ -59,9 +96,28 @@ Item {
                 Layout.fillHeight: true
                 name: model.name
                 active: model.name === launcher.current
-                onClicked: {
-                    shell.activate_app(Window.window, model.appid)
-                }
+
+		onClicked: {
+			// if timer still running ignore
+			if (timer.running) {
+				console.log("Timer still running")
+				return
+			}
+
+			// find the app before trying to start
+			if (find_app(model.application, applications)) {
+				console.log("application " + model.appid + "already started. Just switching")
+				shell.activate_app(Window.window, model.appid)
+				return
+			}
+
+			pid = launcher.launch(model.application)
+			if (pid > 0) {
+				set_current_window_app(model.appid, Window.window)
+				applications[model.application] = pid
+				timer.running = true
+			}
+		}
             }
         }
     }
