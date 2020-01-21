@@ -20,6 +20,7 @@ CONFIG += c++11 link_pkgconfig wayland-scanner
 DESTDIR = $${OUT_PWD}/../package/root/bin
 PKGCONFIG += qtappfw afb-helpers-qt wayland-client
 
+include(../pws/pws.pri)
 include(../interfaces/interfaces.pri)
 
 SOURCES += \

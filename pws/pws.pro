@@ -1,4 +1,4 @@
-# Copyright (c) 2017 TOYOTA MOTOR CORPORATION
+# Copyright (C) 2019 Collabora Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-TEMPLATE = subdirs
+TEMPLATE = lib
+TARGET = pws
+CONFIG += staticlib
+PKGCONFIG += libafbwsc
 
-load(configure)
+HEADERS += pws.h launcher.h
 
-SUBDIRS = pws interfaces homescreen package
+SOURCES += pws.cpp launcher.cpp
 
-homescreen.depends = interfaces pws
-package.depends += homescreen
