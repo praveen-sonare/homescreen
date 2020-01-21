@@ -19,7 +19,10 @@
 #ifndef APPLICATIONLAUNCHER_H
 #define APPLICATIONLAUNCHER_H
 
+#include <QTimer>
 #include <QtCore/QObject>
+
+#include "launcher.h"
 
 class QTimer;
 
@@ -29,7 +32,7 @@ class ApplicationLauncher : public QObject
     Q_PROPERTY(bool launching READ isLaunching NOTIFY launchingChanged)
     Q_PROPERTY(QString current READ current WRITE setCurrent NOTIFY currentChanged)
 public:
-    explicit ApplicationLauncher(QObject *parent = NULL);
+    explicit ApplicationLauncher(const QString &afm_conn_str, QObject *parent = NULL);
 
     bool isLaunching() const;
     QString current() const;
@@ -50,6 +53,7 @@ private:
     bool m_launching;
     QString m_current;
     QTimer *m_timeout;
+    Launcher *m_launcher;
 };
 
 #endif // APPLICATIONLAUNCHER_H

@@ -18,13 +18,9 @@
 
 #include "applicationlauncher.h"
 
-#include "afm_user_daemon_proxy.h"
-
 #include "hmi-debug.h"
 
-extern org::AGL::afm::user *afm_user_daemon_proxy;
-
-ApplicationLauncher::ApplicationLauncher(QObject *parent)
+ApplicationLauncher::ApplicationLauncher(const QString &conn_str, QObject *parent)
     : QObject(parent)
     , m_launching(false)
     , m_timeout(new QTimer(this))
@@ -43,6 +39,12 @@ ApplicationLauncher::ApplicationLauncher(QObject *parent)
     connect(this, &ApplicationLauncher::currentChanged, [&]() {
         setLaunching(false);
     });
+
+    m_launching = false;
+    m_launcher = new Launcher(conn_str, parent);
+
+    if (m_launcher->setup_pws_connection() != 0)
+	    HMI_DEBUG("HomeScreen","ApplicationLauncher failed to set-up connection to afm-system-daemon");
 }
 
 int ApplicationLauncher::launch(const QString &application)
@@ -50,7 +52,9 @@ int ApplicationLauncher::launch(const QString &application)
     int result = -1;
     HMI_DEBUG("HomeScreen","ApplicationLauncher launch %s.", application.toStdString().c_str());
 
-    result = afm_user_daemon_proxy->start(application).value().toInt();
+    if (m_launcher->connection_is_set())
+	    result = m_launcher->start(application);
+
     HMI_DEBUG("HomeScreen","ApplicationLauncher pid: %d.", result);
 
     if (result > 1) {

@@ -24,6 +24,8 @@
 #include <QtQml/qqml.h>
 #include <QQuickWindow>
 #include <QScreen>
+#include <QUrlQuery>
+#include <QTimer>
 #include <qpa/qplatformnativeinterface.h>
 
 #include <cstdlib>
@@ -35,27 +37,13 @@
 #include <bluetooth.h>
 #include "applicationlauncher.h"
 #include "statusbarmodel.h"
-#include "afm_user_daemon_proxy.h"
 #include "mastervolume.h"
 #include "shell.h"
 #include "hmi-debug.h"
 
 #include "wayland-agl-shell-client-protocol.h"
 
-// XXX: We want this DBus connection to be shared across the different
-// QML objects, is there another way to do this, a nice way, perhaps?
-org::AGL::afm::user *afm_user_daemon_proxy;
-
-namespace {
-
-struct Cleanup {
-    static inline void cleanup(org::AGL::afm::user *p) {
-        delete p;
-        afm_user_daemon_proxy = Q_NULLPTR;
-    }
-};
-
-}
+#define CONNECT_STR	"unix:/run/platform/apis/ws/afm-main"
 
 static void global_add(void *data, struct wl_registry *reg, uint32_t name,
                        const char *interface, uint32_t)
@@ -109,13 +97,6 @@ int main(int argc, char *argv[])
     }
     std::shared_ptr<struct agl_shell> shell{agl_shell, agl_shell_destroy};
 
-    // use launch process
-    QScopedPointer<org::AGL::afm::user, Cleanup> afm_user_daemon_proxy(new org::AGL::afm::user("org.AGL.afm.user",
-                                                                                               "/org/AGL/afm/user",
-                                                                                               QDBusConnection::sessionBus(),
-                                                                                               0));
-    ::afm_user_daemon_proxy = afm_user_daemon_proxy.data();
-
     QCoreApplication::setOrganizationDomain("LinuxFoundation");
     QCoreApplication::setOrganizationName("AutomotiveGradeLinux");
     QCoreApplication::setApplicationName("HomeScreen");
@@ -145,7 +126,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<StatusBarModel>("HomeScreen", 1, 0, "StatusBarModel");
     qmlRegisterType<MasterVolume>("MasterVolume", 1, 0, "MasterVolume");
 
-    ApplicationLauncher *launcher = new ApplicationLauncher();
+    ApplicationLauncher *launcher = new ApplicationLauncher(CONNECT_STR, &a);
 
     QUrl bindingAddress;
     bindingAddress.setScheme(QStringLiteral("ws"));
@@ -156,31 +137,6 @@ int main(int argc, char *argv[])
     QUrlQuery query;
     query.addQueryItem(QStringLiteral("token"), token);
     bindingAddress.setQuery(query);
-
-#if 0
-    // mail.qml loading
-    QQmlApplicationEngine engine;
-    engine.rootContext()->setContextProperty("bindingAddress", bindingAddress);
-    engine.rootContext()->setContextProperty("launcher", launcher);
-    engine.rootContext()->setContextProperty("weather", new Weather(bindingAddress));
-    engine.rootContext()->setContextProperty("bluetooth", new Bluetooth(bindingAddress, engine.rootContext()));
-    //engine.rootContext()->setContextProperty("screenInfo", &screenInfo);
-    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-    engine.load(QUrl(QStringLiteral("qrc:/background.qml")));
-
-    auto root_objects = engine.rootObjects();
-    printf("num root objects: %d\n", root_objects.length());
-    QObject *root = engine.rootObjects().first();
-    QQuickWindow *window = qobject_cast<QQuickWindow *>(root);
-
-    for (auto o : root_objects) {
-        qDebug() << o->dynamicPropertyNames();
-    }
-
-    QList<QObject *> sobjs = engine.rootObjects();
-    StatusBarModel *statusBar = sobjs.first()->findChild<StatusBarModel *>("statusBar");
-    statusBar->init(bindingAddress, engine.rootContext());
-#endif
 
     QQmlEngine engine;
     QQmlContext *context = engine.rootContext();
