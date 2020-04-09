@@ -28,22 +28,22 @@ Item {
         ListElement {
             appid: "launcher"
             name: 'launcher'
-            application: 'launcher@0.1'
+            application: 'launcher'
         }
         ListElement {
-            appid: 'mediaplayer'
+            appid: "mediaplayer"
             name: 'MediaPlayer'
-            application: 'mediaplayer@0.1'
+            application: 'mediaplayer'
         }
         ListElement {
-            appid: 'hvac'
+            appid: "hvac"
             name: 'HVAC'
-            application: 'hvac@0.1'
+            application: 'hvac'
         }
         ListElement {
-            appid: 'navigation'
+            appid: "navigation"
             name: 'Navigation'
-            application: 'navigation@0.1'
+            application: 'navigation'
         }
     }
 
