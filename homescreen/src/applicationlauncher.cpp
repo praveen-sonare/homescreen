@@ -65,6 +65,12 @@ int ApplicationLauncher::launch(const QString &application)
     return result;
 }
 
+bool ApplicationLauncher::is_running(const QString &application)
+{
+    if (m_launcher->connection_is_set())
+	    return m_launcher->is_running(application);
+}
+
 bool ApplicationLauncher::isLaunching() const
 {
     return m_launching;

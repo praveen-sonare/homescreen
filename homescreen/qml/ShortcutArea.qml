@@ -54,17 +54,27 @@ Item {
 
 	property variant applications: {'' : -1}
 
+	function find_app_with_launcher(app_id) {
+		if (launcher.is_running(app_id))
+			return true
+
+		return false
+	}
+
 	function find_app(app, apps) {
 		for (var x in apps) {
 
 			if (apps[x] == -1)
 				continue
 
-			if (x === app)
-				return true
+			if (x === app) {
+				if (find_app_with_launcher(x))
+					return true
+			}
 		}
 		return false
 	}
+
 
 	function set_current_window_app(appid, window) {
 		current_appid = appid

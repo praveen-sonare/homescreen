@@ -44,6 +44,7 @@ signals:
 
 public slots:
     int launch(const QString &application);
+    bool is_running(const QString &application);
     void setCurrent(const QString &current);
 
 private:
