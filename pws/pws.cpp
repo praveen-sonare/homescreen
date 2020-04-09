@@ -344,6 +344,8 @@ int
 pws_start_process(struct pws_data_source *pws, const char *afm_name)
 {
 	int rid = -1;
+
+	fprintf(stdout, "pws_start_process() with afm_name %s\n", afm_name);
 	if (pws_do_call(pws, "start", afm_name) < 0)
 		return -1;
 
@@ -485,7 +487,7 @@ pws_get_list_runnables(struct pws_data_source *pws,  struct json_object **json)
 				JSON_C_TO_STRING_PRETTY | JSON_C_TO_STRING_NOSLASHESCAPE));
 #endif
 		if (items == 0) {
-			fprintf(stdout, "pws_get_list_runnables() turn items %d, bails sooner\n", items);
+			fprintf(stdout, "pws_get_list_runnables() turn items %ld, bails sooner\n", items);
 			*json = NULL;
 			return items;
 		}
@@ -494,6 +496,6 @@ pws_get_list_runnables(struct pws_data_source *pws,  struct json_object **json)
 		*json = result;
 	}
 
-	fprintf(stdout, "pws_get_list_runnables() turn items %d\n", items);
+	fprintf(stdout, "pws_get_list_runnables() turn items %ld\n", items);
 	return items;
 }

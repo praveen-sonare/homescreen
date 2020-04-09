@@ -52,6 +52,7 @@ int ApplicationLauncher::launch(const QString &application)
     int result = -1;
     HMI_DEBUG("HomeScreen","ApplicationLauncher launch %s.", application.toStdString().c_str());
 
+    fprintf(stdout, "ApplicationLauncher::launch with %s\n", application.toStdString().c_str());
     if (m_launcher->connection_is_set())
 	    result = m_launcher->start(application);
 
