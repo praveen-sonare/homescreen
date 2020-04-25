@@ -18,12 +18,10 @@
 
 import QtQuick 2.2
 import QtQuick.Layouts 1.1
+import QtQuick.Window 2.2
 
 Item {
     id: root
-    width: 785
-    height: 218
-
 
     ListModel {
         id: applicationModel
@@ -53,7 +51,7 @@ Item {
 
     RowLayout {
         anchors.fill: parent
-        spacing: 2
+        spacing: 0
         Repeater {
             model: applicationModel
             delegate: ShortcutIcon {
@@ -62,9 +60,10 @@ Item {
                 name: model.name
                 active: model.name === launcher.current
                 onClicked: {
+                    console.log("Activating: " + model.appid)
                     homescreenHandler.tapShortcut(model.appid)
                 }
             }
-        }
+       }
     }
 }

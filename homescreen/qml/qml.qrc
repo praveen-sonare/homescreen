@@ -7,9 +7,12 @@
         <file>MediaAreaRadio.qml</file>
         <file>ShortcutArea.qml</file>
         <file>ShortcutIcon.qml</file>
+        <file>SpeechChrome.qml</file>
         <file>StatusArea.qml</file>
         <file>TopArea.qml</file>
         <file>IconItem.qml</file>
-        <file>SpeechChrome.qml</file>
+        <file>background.qml</file>
+        <file>toppanel.qml</file>
+        <file>bottompanel.qml</file>
     </qresource>
 </RCC>
