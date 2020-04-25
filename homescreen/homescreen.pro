@@ -15,10 +15,10 @@
 
 TEMPLATE = app
 TARGET = HomeScreen
-QT = qml quick websockets
-CONFIG += c++11 link_pkgconfig
+QT = qml quick websockets gui-private
+CONFIG += c++11 link_pkgconfig wayland-scanner
 DESTDIR = $${OUT_PWD}/../package/root/bin
-PKGCONFIG += qlibwindowmanager qtappfw-weather qtappfw-network qtappfw-bt afb-helpers-qt
+PKGCONFIG += qtappfw-weather qtappfw-network qtappfw-bt afb-helpers-qt wayland-client json-c
 
 LIBS += -lhomescreen
 
@@ -29,6 +29,7 @@ SOURCES += \
     src/applicationlauncher.cpp \
     src/mastervolume.cpp \
     src/homescreenhandler.cpp \
+    src/shell.cpp \
     src/aglsocketwrapper.cpp \
     src/chromecontroller.cpp
 
@@ -38,6 +39,7 @@ HEADERS  += \
     src/applicationlauncher.h \
     src/mastervolume.h \
     src/homescreenhandler.h \
+    src/shell.h \
     src/aglsocketwrapper.h \
     src/chromecontroller.h \
     src/constants.h
@@ -54,3 +56,7 @@ RESOURCES += \
     qml/images/images.qrc \
     qml/qml.qrc \
     qml/images/SpeechChrome/speechchrome.qrc
+
+
+WAYLANDCLIENTSOURCES += \
+    protocol/agl-shell.xml

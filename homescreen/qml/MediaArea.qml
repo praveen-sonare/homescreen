@@ -20,8 +20,7 @@ import QtQuick.Controls 2.0
 
 StackView {
     id: root
-    width: parent.width
-    height: parent.height
+    anchors.fill: parent
 
     initialItem: blank
 

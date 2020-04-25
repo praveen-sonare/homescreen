@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
+#include <QGuiApplication>
 #include <QFileInfo>
 #include "homescreenhandler.h"
 #include <functional>
 #include "hmi-debug.h"
 
+#include <qpa/qplatformnativeinterface.h>
+
 void* HomescreenHandler::myThis = 0;
 
-HomescreenHandler::HomescreenHandler(QObject *parent) :
+HomescreenHandler::HomescreenHandler(Shell *_aglShell, QObject *parent) :
     QObject(parent),
-    mp_hs(NULL)
+    aglShell(_aglShell)
 {
 
 }
@@ -42,6 +45,7 @@ void HomescreenHandler::init(int port, const char *token)
 
     myThis = this;
 
+
     mp_hs->registerCallback(nullptr, HomescreenHandler::onRep_static);
 
     mp_hs->set_event_handler(LibHomeScreen::Event_OnScreenMessage, [this](json_object *object){
@@ -50,6 +54,7 @@ void HomescreenHandler::init(int port, const char *token)
         HMI_DEBUG("HomeScreen","set_event_handler Event_OnScreenMessage display_message = %s", display_message);
     });
 
+    // should be handled in the top panel
     mp_hs->set_event_handler(LibHomeScreen::Event_ShowNotification,[this](json_object *object){
        json_object *p_obj = json_object_object_get(object, "parameter");
        const char *icon = json_object_get_string(
@@ -70,6 +75,7 @@ void HomescreenHandler::init(int port, const char *token)
        emit showNotification(QString(QLatin1String(app_id)), icon_path, QString(QLatin1String(text)));
     });
 
+    // should be handled in the bottom panel
     mp_hs->set_event_handler(LibHomeScreen::Event_ShowInformation,[this](json_object *object){
        json_object *p_obj = json_object_object_get(object, "parameter");
        const char *info = json_object_get_string(
@@ -79,15 +85,34 @@ void HomescreenHandler::init(int port, const char *token)
     });
 }
 
+static struct wl_output *
+getWlOutput(QPlatformNativeInterface *native, QScreen *screen)
+{
+	void *output = native->nativeResourceForScreen("output", screen);
+	return static_cast<struct ::wl_output*>(output);
+}
+
 void HomescreenHandler::tapShortcut(QString application_id)
 {
-    HMI_DEBUG("HomeScreen","tapShortcut %s", application_id.toStdString().c_str());
-    struct json_object* j_json = json_object_new_object();
-    struct json_object* value;
-    value = json_object_new_string("normal.full");
-    json_object_object_add(j_json, "area", value);
+	HMI_DEBUG("HomeScreen","tapShortcut %s", application_id.toStdString().c_str());
 
-    mp_hs->showWindow(application_id.toStdString().c_str(), j_json);
+	struct json_object* j_json = json_object_new_object();
+	struct json_object* value;
+
+	struct agl_shell *agl_shell = aglShell->shell.get();
+	QPlatformNativeInterface *native = qApp->platformNativeInterface();
+	struct wl_output *output = getWlOutput(native, qApp->screens().first());
+
+	value = json_object_new_string("normal.full");
+	json_object_object_add(j_json, "area", value);
+
+	mp_hs->showWindow(application_id.toStdString().c_str(), j_json);
+
+	// this works (and it is redundant the first time), due to the default
+	// policy engine installed which actives the application, when starting
+	// the first time. Later calls to HomescreenHandler::tapShortcut will
+	// require calling 'agl_shell_activate_app'
+	agl_shell_activate_app(agl_shell, application_id.toStdString().c_str(), output);
 }
 
 void HomescreenHandler::onRep_static(struct json_object* reply_contents)

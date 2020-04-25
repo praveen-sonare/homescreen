@@ -22,8 +22,8 @@ import HomeScreen 1.0
 
 Item {
     id: root
-    width: 295
-    height: 218
+    //width: 295
+    //height: 218
 
     property date now: new Date
     Timer {
