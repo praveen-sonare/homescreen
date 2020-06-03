@@ -117,15 +117,33 @@ create_component(QPlatformNativeInterface *native, QQmlComponent *comp,
 	return getWlSurface(native, win);
 }
 
+static QScreen *
+find_screen(const char *screen_name)
+{
+	QList<QScreen *> screens = qApp->screens();
+	QScreen *found = nullptr;
+	QString qstr_name = QString::fromUtf8(screen_name, -1);
+
+	for (QScreen *xscreen : screens) {
+		if (qstr_name == xscreen->name()) {
+			found = xscreen;
+			break;
+		}
+	}
+
+	return found;
+}
+
 static void
 load_agl_shell_app(QPlatformNativeInterface *native,
 		   QQmlApplicationEngine *engine,
-		   struct agl_shell *agl_shell, QUrl &bindingAddress)
+		   struct agl_shell *agl_shell, QUrl &bindingAddress,
+		   const char *screen_name)
 {
 	struct wl_surface *bg, *top, *bottom;
 	struct wl_output *output;
-
 	QObject *qobj_bg, *qobj_top, *qobj_bottom;
+	QScreen *screen = nullptr;
 
 	QQmlComponent bg_comp(engine, QUrl("qrc:/background.qml"));
 	qInfo() << bg_comp.errors();
@@ -136,15 +154,18 @@ load_agl_shell_app(QPlatformNativeInterface *native,
 	QQmlComponent bot_comp(engine, QUrl("qrc:/bottompanel.qml"));
 	qInfo() << bot_comp.errors();
 
-	QScreen *screen = qApp->screens().first();
-	if (!screen)
-		return;
+	if (!screen_name)
+		screen = qApp->primaryScreen();
+	else
+		screen = find_screen(screen_name);
 
+	qDebug() << "found primary screen " << qApp->primaryScreen()->name() <<
+		"first screen " << qApp->screens().first()->name();
 	output = getWlOutput(native, screen);
 
-	bg = create_component(native, &bg_comp, screen, &qobj_bg);
 	top = create_component(native, &top_comp, screen, &qobj_top);
 	bottom = create_component(native, &bot_comp, screen, &qobj_bottom);
+	bg = create_component(native, &bg_comp, screen, &qobj_bg);
 
 	/* engine.rootObjects() works only if we had a load() */
 	StatusBarModel *statusBar = qobj_top->findChild<StatusBarModel *>("statusBar");
@@ -155,6 +176,7 @@ load_agl_shell_app(QPlatformNativeInterface *native,
 
 	agl_shell_set_panel(agl_shell, top, output, AGL_SHELL_EDGE_TOP);
 	agl_shell_set_panel(agl_shell, bottom, output, AGL_SHELL_EDGE_BOTTOM);
+	qDebug() << "Setting homescreen to screen  " << screen->name();
 
 	agl_shell_set_background(agl_shell, bg, output);
 
@@ -165,12 +187,15 @@ load_agl_shell_app(QPlatformNativeInterface *native,
 	});
 }
 
-
 int main(int argc, char *argv[])
 {
+    setenv("QT_QPA_PLATFORM", "wayland", 1);
     QGuiApplication a(argc, argv);
+    const char *screen_name;
+
     QPlatformNativeInterface *native = qApp->platformNativeInterface();
     struct agl_shell *agl_shell = nullptr;
+    screen_name = getenv("HOMESCREEN_START_SCREEN");
 
     QCoreApplication::setOrganizationDomain("LinuxFoundation");
     QCoreApplication::setOrganizationName("AutomotiveGradeLinux");
@@ -243,7 +268,7 @@ int main(int argc, char *argv[])
     /* instead of loading main.qml we load one-by-one each of the QMLs,
      * divided now between several surfaces: panels, background.
      */
-    load_agl_shell_app(native, &engine, agl_shell, bindingAddress);
+    load_agl_shell_app(native, &engine, agl_shell, bindingAddress, screen_name);
 
     return a.exec();
 }
