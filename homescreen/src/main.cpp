@@ -201,6 +201,8 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("AutomotiveGradeLinux");
     QCoreApplication::setApplicationName("HomeScreen");
     QCoreApplication::setApplicationVersion("0.7.0");
+    /* we need to have an app_id */
+    a.setDesktopFileName("homescreen");
 
     QCommandLineParser parser;
     parser.addPositionalArgument("port", a.translate("main", "port for binding"));
