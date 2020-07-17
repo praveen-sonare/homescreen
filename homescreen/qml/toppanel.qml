@@ -3,13 +3,19 @@ import QtQuick.Window 2.13
 
 Window {
     id: toppanel
-    width: Screen.width
-    height: Screen.height * (218.0 / 1920.0)
+    width: container.width
+    height: Screen.height * (210.0 / 1920.0)
     flags: Qt.FramelessWindowHint
     visible: true
     //color: "#aaaa0000"
 
-    TopArea {
+    Item {
+	id: container
+	width: Screen.width
+	height: Screen.height * (218.0 / 1920.0)
+
+	TopArea {
+	}
     }
 
     Timer {
