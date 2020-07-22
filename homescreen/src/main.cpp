@@ -56,7 +56,11 @@ static void
 application_id_event(void *data, struct agl_shell_desktop *agl_shell_desktop,
 		     const char *app_id)
 {
-
+	// this event is sent  only when surfaces are being created.  we call
+	// setCurrent() to take care of this the first time, with later state
+	// event changes being handled by the application_state_event()
+	struct shell_container *sc = static_cast<struct shell_container *>(data);
+	sc->launcher->setCurrent(QString(app_id));
 }
 
 static void
@@ -65,9 +69,7 @@ application_state_event(void *data, struct agl_shell_desktop *agl_shell_desktop,
 			uint32_t app_state, uint32_t app_role)
 {
 	struct shell_container *sc = static_cast<struct shell_container *>(data);
-
-	qDebug() << "app_id " << app_id << " app_data " << app_data
-		<< " app_state " << app_state << " app_role " << app_role;
+	sc->launcher->setCurrent(QString(app_id));
 }
 
 static const struct agl_shell_desktop_listener agl_shell_desktop_listener = {
