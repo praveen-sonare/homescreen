@@ -49,19 +49,25 @@ struct shell_container {
 	// used to propagate events from C/C++ event handlers from the protocol
 	// to the QML in case we need them
 	Shell *a_shell;
+	ApplicationLauncher *launcher;
 };
 
 static void
 application_id_event(void *data, struct agl_shell_desktop *agl_shell_desktop,
-		const char *app_id)
+		     const char *app_id)
 {
+
 }
 
 static void
 application_state_event(void *data, struct agl_shell_desktop *agl_shell_desktop,
-		     const char *app_id, const char *app_data,
-		     uint32_t app_state, uint32_t app_role)
+			const char *app_id, const char *app_data,
+			uint32_t app_state, uint32_t app_role)
 {
+	struct shell_container *sc = static_cast<struct shell_container *>(data);
+
+	qDebug() << "app_id " << app_id << " app_data " << app_data
+		<< " app_state " << app_state << " app_role " << app_role;
 }
 
 static const struct agl_shell_desktop_listener agl_shell_desktop_listener = {
@@ -268,6 +274,7 @@ int main(int argc, char *argv[])
     }
 
     HMI_DEBUG("HomeScreen","port = %d, token = %s", port, token.toStdString().c_str());
+    ApplicationLauncher *launcher = new ApplicationLauncher();
 
     sc = register_agl_shell(native);
     if (!sc) {
@@ -280,6 +287,7 @@ int main(int argc, char *argv[])
 	    shell_desktop{sc->agl_shell_desktop, agl_shell_desktop_destroy};
     Shell *aglShell = new Shell(shell, shell_desktop, &a);
     sc->a_shell = aglShell;
+    sc->launcher = launcher;
 
     // import C++ class to QML
     // qmlRegisterType<ApplicationLauncher>("HomeScreen", 1, 0, "ApplicationLauncher");
@@ -288,7 +296,6 @@ int main(int argc, char *argv[])
     qmlRegisterUncreatableType<ChromeController>("SpeechChrome", 1, 0, "SpeechChromeController",
                                                  QLatin1String("SpeechChromeController is uncreatable."));
 
-    ApplicationLauncher *launcher = new ApplicationLauncher();
 
     HomescreenHandler* homescreenHandler = new HomescreenHandler(aglShell);
     homescreenHandler->init(port, token.toStdString().c_str());
