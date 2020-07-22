@@ -63,4 +63,5 @@ RESOURCES += \
 
 
 WAYLANDCLIENTSOURCES += \
-    protocol/agl-shell.xml
+    protocol/agl-shell.xml \
+    protocol/agl-shell-desktop.xml

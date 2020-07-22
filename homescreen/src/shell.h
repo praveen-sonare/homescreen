@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019 Collabora Ltd.
+ * Copyright © 2019, 2020 Collabora Ltd.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -33,6 +33,7 @@
 #include <QWindow>
 #include <memory>
 #include "wayland-agl-shell-client-protocol.h"
+#include "wayland-agl-shell-desktop-client-protocol.h"
 
 /*
  * Basic type to wrap the agl_shell wayland object into a QObject, so that it
@@ -45,9 +46,12 @@ class Shell : public QObject
 
 public:
     std::shared_ptr<struct agl_shell> shell;
+    std::shared_ptr<struct agl_shell_desktop> shell_desktop;
 
-    Shell(std::shared_ptr<struct agl_shell> shell, QObject *parent = nullptr) :
-        QObject(parent), shell(shell) 
+    Shell(std::shared_ptr<struct agl_shell> shell,
+	  std::shared_ptr<struct agl_shell_desktop> shell_desktop,
+	  QObject *parent = nullptr) :
+        QObject(parent), shell(shell), shell_desktop(shell_desktop)
     {}
 public slots:
     void activate_app(QWindow *win, const QString &app_id);
