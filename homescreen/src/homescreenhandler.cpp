@@ -24,9 +24,10 @@
 
 void* HomescreenHandler::myThis = 0;
 
-HomescreenHandler::HomescreenHandler(Shell *_aglShell, QObject *parent) :
+HomescreenHandler::HomescreenHandler(Shell *_aglShell, ApplicationLauncher *_launcher, QObject *parent) :
     QObject(parent),
-    aglShell(_aglShell)
+    aglShell(_aglShell),
+    launcher(_launcher)
 {
 
 }
@@ -96,6 +97,7 @@ void HomescreenHandler::tapShortcut(QString application_id)
 {
 	HMI_DEBUG("HomeScreen","tapShortcut %s", application_id.toStdString().c_str());
 	mp_hs->showWindow(application_id.toStdString().c_str(), nullptr);
+	launcher->setLaunching(true);
 
 	// this works (and it is redundant the first time), due to the default
 	// policy engine installed which actives the application, when starting

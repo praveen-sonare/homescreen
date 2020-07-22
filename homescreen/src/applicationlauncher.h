@@ -41,8 +41,6 @@ signals:
 
 public slots:
     void setCurrent(const QString &current);
-
-private:
     void setLaunching(bool launching);
 
 private:

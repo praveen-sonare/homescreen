@@ -22,6 +22,7 @@
 #include <libhomescreen.hpp>
 
 #include "shell.h"
+#include "applicationlauncher.h"
 #include <string>
 
 using namespace std;
@@ -30,7 +31,7 @@ class HomescreenHandler : public QObject
 {
     Q_OBJECT
 public:
-    explicit HomescreenHandler(Shell *aglShell, QObject *parent = 0);
+    explicit HomescreenHandler(Shell *aglShell, ApplicationLauncher *launcher, QObject *parent = 0);
     ~HomescreenHandler();
 
     void init(int port, const char* token);
@@ -50,6 +51,7 @@ signals:
 private:
     LibHomeScreen *mp_hs;
     Shell *aglShell;
+    ApplicationLauncher *launcher;
 };
 
 #endif // HOMESCREENHANDLER_H
