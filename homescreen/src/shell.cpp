@@ -36,16 +36,16 @@ getWlOutput(QPlatformNativeInterface *native, QScreen *screen)
 	return static_cast<struct ::wl_output*>(output);
 }
 
-void Shell::activate_app(QWindow *win, const QString &app_id)
+void
+Shell::activate_app(QWindow *win, const QString &app_id)
 {
-    QPlatformNativeInterface *native = qApp->platformNativeInterface();
-    QScreen *screen = win->screen();
+	QPlatformNativeInterface *native = qApp->platformNativeInterface();
+	QScreen *screen = win->screen();
 
-    struct wl_output *output = getWlOutput(native, screen);
+	struct wl_output *output = getWlOutput(native, screen);
 
-    qDebug() << "++ activating app_id " << app_id.toStdString().c_str();
+	qDebug() << "++ activating app_id " << app_id.toStdString().c_str();
 
-    agl_shell_activate_app(this->shell.get(),
-                           app_id.toStdString().c_str(),
-                           output);
+	agl_shell_desktop_activate_app(this->shell_desktop.get(),
+			app_id.toStdString().c_str(), NULL, output);
 }
