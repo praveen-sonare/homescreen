@@ -40,12 +40,16 @@ void
 Shell::activate_app(QWindow *win, const QString &app_id)
 {
 	QPlatformNativeInterface *native = qApp->platformNativeInterface();
-	QScreen *screen = win->screen();
+	struct wl_output *output;
+	QScreen *screen = nullptr;
 
-	struct wl_output *output = getWlOutput(native, screen);
+	if (!win)
+		screen = qApp->screens().first();
+	else
+		screen = win->screen();
 
+	output = getWlOutput(native, screen);
 	qDebug() << "++ activating app_id " << app_id.toStdString().c_str();
-
 	agl_shell_desktop_activate_app(this->shell_desktop.get(),
 			app_id.toStdString().c_str(), NULL, output);
 }

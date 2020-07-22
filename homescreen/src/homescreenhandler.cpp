@@ -95,24 +95,13 @@ getWlOutput(QPlatformNativeInterface *native, QScreen *screen)
 void HomescreenHandler::tapShortcut(QString application_id)
 {
 	HMI_DEBUG("HomeScreen","tapShortcut %s", application_id.toStdString().c_str());
-
-	struct json_object* j_json = json_object_new_object();
-	struct json_object* value;
-
-	struct agl_shell *agl_shell = aglShell->shell.get();
-	QPlatformNativeInterface *native = qApp->platformNativeInterface();
-	struct wl_output *output = getWlOutput(native, qApp->screens().first());
-
-	value = json_object_new_string("normal.full");
-	json_object_object_add(j_json, "area", value);
-
-	mp_hs->showWindow(application_id.toStdString().c_str(), j_json);
+	mp_hs->showWindow(application_id.toStdString().c_str(), nullptr);
 
 	// this works (and it is redundant the first time), due to the default
 	// policy engine installed which actives the application, when starting
 	// the first time. Later calls to HomescreenHandler::tapShortcut will
 	// require calling 'agl_shell_activate_app'
-	agl_shell_activate_app(agl_shell, application_id.toStdString().c_str(), output);
+	aglShell->activate_app(nullptr, application_id);
 }
 
 void HomescreenHandler::onRep_static(struct json_object* reply_contents)
