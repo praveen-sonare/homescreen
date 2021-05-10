@@ -19,6 +19,8 @@
 #include <QTimer>
 #include <QtDebug>
 
+#define MASTER_CONTROL "Master Playback"
+
 MasterVolume::MasterVolume(QObject* parent)
 	: QObject(parent)
 	, m_volume{50}
@@ -46,7 +48,7 @@ void MasterVolume::setVolume(qint32 volume)
 	{
 		m_volume = volume;
 		QJsonObject arg;
-		arg.insert("control", "Master");
+		arg.insert("control", MASTER_CONTROL);
 		double v = (double) volume / 100.0;
 		arg.insert("value", v);
 		m_client.call("audiomixer", "volume", arg);
@@ -56,7 +58,7 @@ void MasterVolume::setVolume(qint32 volume)
 void MasterVolume::onClientConnected()
 {
 	QJsonObject arg;
-	arg.insert("control", "Master");
+	arg.insert("control", MASTER_CONTROL);
 	m_client.call("audiomixer", "volume", arg, [this](bool r, const QJsonValue& v) {
 		if (r && v.isObject()) {
 			int volume = v.toObject()["response"].toObject()["volume"].toDouble() * 100;
@@ -92,7 +94,7 @@ void MasterVolume::onClientEventReceived(QString name, const QJsonValue& data)
 	{
 		QString ctlName = data.toObject()["control"].toString();
 
-		if (ctlName != "Master")
+		if (ctlName != MASTER_CONTROL)
 			return;
 
 		int volume = data.toObject()["value"].toDouble() * 100;
