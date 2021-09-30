@@ -25,13 +25,13 @@ StackView {
     initialItem: blank
 
     Component {
-        id: blank
+          id: blank
         MediaAreaBlank {
 //            MouseArea {
 //                anchors.fill: parent
 //                onClicked: root.push(mouse.x < 540 ? music : radio)
 //            }
-        }
+       }
     }
 
     Component {

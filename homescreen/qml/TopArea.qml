@@ -34,12 +34,12 @@ Image {
             Layout.fillHeight: true
             Layout.preferredWidth: 775
         }
-        StatusArea {
-            id: statusArea
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            Layout.preferredWidth: 291
-        }
+        //StatusArea {
+        //    id: statusArea
+        //    Layout.fillWidth: true
+        //    Layout.fillHeight: true
+        //    Layout.preferredWidth: 291
+        //}
     }
 
     Timer {

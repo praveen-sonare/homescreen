@@ -26,14 +26,13 @@
 #include <QQuickWindow>
 #include <QTimer>
 
-#include <weather.h>
-#include <bluetooth.h>
+//#include <weather.h>
+//#include <bluetooth.h>
 #include "applicationlauncher.h"
-#include "statusbarmodel.h"
-#include "mastervolume.h"
+//#include "statusbarmodel.h"
+//#include "mastervolume.h"
 #include "homescreenhandler.h"
-#include "hmi-debug.h"
-#include "chromecontroller.h"
+//#include "chromecontroller.h"
 
 #include <qpa/qplatformnativeinterface.h>
 #include <wayland-client.h>
@@ -137,7 +136,7 @@ find_screen(const char *screen_name)
 static void
 load_agl_shell_app(QPlatformNativeInterface *native,
 		   QQmlApplicationEngine *engine,
-		   struct agl_shell *agl_shell, QUrl &bindingAddress,
+		   struct agl_shell *agl_shell,
 		   const char *screen_name, bool is_demo)
 {
 	struct wl_surface *bg, *top, *bottom;
@@ -184,11 +183,11 @@ load_agl_shell_app(QPlatformNativeInterface *native,
 
 
 	/* engine.rootObjects() works only if we had a load() */
-	StatusBarModel *statusBar = qobj_top->findChild<StatusBarModel *>("statusBar");
-	if (statusBar) {
-		qDebug() << "got statusBar objectname, doing init()";
-		statusBar->init(bindingAddress, engine->rootContext());
-	}
+	//StatusBarModel *statusBar = qobj_top->findChild<StatusBarModel *>("statusBar");
+	//if (statusBar) {
+	//	qDebug() << "got statusBar objectname, doing init()";
+	//	statusBar->init(bindingAddress, engine->rootContext());
+	//}
 
 	agl_shell_set_panel(agl_shell, top, output, AGL_SHELL_EDGE_TOP);
 	agl_shell_set_panel(agl_shell, bottom, output, AGL_SHELL_EDGE_BOTTOM);
@@ -205,92 +204,65 @@ load_agl_shell_app(QPlatformNativeInterface *native,
 
 int main(int argc, char *argv[])
 {
-    setenv("QT_QPA_PLATFORM", "wayland", 1);
-    QGuiApplication a(argc, argv);
-    const char *screen_name;
-    bool is_demo_val = false;
+	// keep this as we're not going not going to have the appfw
+	setenv("QT_QPA_PLATFORM", "wayland", 1);
 
-    QPlatformNativeInterface *native = qApp->platformNativeInterface();
-    struct agl_shell *agl_shell = nullptr;
-    screen_name = getenv("HOMESCREEN_START_SCREEN");
+	QGuiApplication a(argc, argv);
+	const char *screen_name;
+	bool is_demo_val = false;
 
-    const char *is_demo = getenv("HOMESCREEN_DEMO_CI");
-    if (is_demo && strcmp(is_demo, "1") == 0)
-	    is_demo_val = true;
+	QPlatformNativeInterface *native = qApp->platformNativeInterface();
+	struct agl_shell *agl_shell = nullptr;
+	screen_name = getenv("HOMESCREEN_START_SCREEN");
 
-    QCoreApplication::setOrganizationDomain("LinuxFoundation");
-    QCoreApplication::setOrganizationName("AutomotiveGradeLinux");
-    QCoreApplication::setApplicationName("HomeScreen");
-    QCoreApplication::setApplicationVersion("0.7.0");
-    /* we need to have an app_id */
-    a.setDesktopFileName("homescreen");
+	// could be  removed only for CI
+	const char *is_demo = getenv("HOMESCREEN_DEMO_CI");
+	if (is_demo && strcmp(is_demo, "1") == 0)
+		is_demo_val = true;
 
-    QCommandLineParser parser;
-    parser.addPositionalArgument("port", a.translate("main", "port for binding"));
-    parser.addPositionalArgument("secret", a.translate("main", "secret for binding"));
-    parser.addHelpOption();
-    parser.addVersionOption();
-    parser.process(a);
-    QStringList positionalArguments = parser.positionalArguments();
+	QCoreApplication::setOrganizationDomain("LinuxFoundation");
+	QCoreApplication::setOrganizationName("AutomotiveGradeLinux");
+	QCoreApplication::setApplicationName("HomeScreen");
+	QCoreApplication::setApplicationVersion("0.7.0");
 
-    int port = 1700;
-    QString token = "wm";
-    QString graphic_role = "homescreen"; // defined in layers.json in Window Manager
+	// we need to have an app_id
+	a.setDesktopFileName("homescreen");
 
-    if (positionalArguments.length() == 2) {
-        port = positionalArguments.takeFirst().toInt();
-        token = positionalArguments.takeFirst();
-    }
+	agl_shell = register_agl_shell(native);
+	if (!agl_shell) {
+		fprintf(stderr, "agl_shell extension is not advertised. "
+				"Are you sure that agl-compositor is running?\n");
+		exit(EXIT_FAILURE);
+	}
 
-    HMI_DEBUG("HomeScreen","port = %d, token = %s", port, token.toStdString().c_str());
+	std::shared_ptr<struct agl_shell> shell{agl_shell, agl_shell_destroy};
+	Shell *aglShell = new Shell(shell, &a);
 
-    agl_shell = register_agl_shell(native);
-    if (!agl_shell) {
-	    fprintf(stderr, "agl_shell extension is not advertised. "
-			    "Are you sure that agl-compositor is running?\n");
-	    exit(EXIT_FAILURE);
-    }
+	// import C++ class to QML
+	//qmlRegisterType<StatusBarModel>("HomeScreen", 1, 0, "StatusBarModel");
+	//qmlRegisterType<MasterVolume>("MasterVolume", 1, 0, "MasterVolume");
+	//qmlRegisterUncreatableType<ChromeController>("SpeechChrome", 1, 0, "SpeechChromeController", QLatin1String("SpeechChromeController is uncreatable."));
 
-    std::shared_ptr<struct agl_shell> shell{agl_shell, agl_shell_destroy};
-    Shell *aglShell = new Shell(shell, &a);
+	ApplicationLauncher *launcher = new ApplicationLauncher();
+	launcher->setCurrent(QStringLiteral("launcher"));
+	HomescreenHandler* homescreenHandler = new HomescreenHandler(aglShell, launcher);
+	homescreenHandler->init();
 
-    // import C++ class to QML
-    qmlRegisterType<StatusBarModel>("HomeScreen", 1, 0, "StatusBarModel");
-    qmlRegisterType<MasterVolume>("MasterVolume", 1, 0, "MasterVolume");
-    qmlRegisterUncreatableType<ChromeController>("SpeechChrome", 1, 0, "SpeechChromeController",
-                                                 QLatin1String("SpeechChromeController is uncreatable."));
+	QQmlApplicationEngine engine;
+	QQmlContext *context = engine.rootContext();
 
-    ApplicationLauncher *launcher = new ApplicationLauncher();
-    launcher->setCurrent(QStringLiteral("launcher"));
-    HomescreenHandler* homescreenHandler = new HomescreenHandler(aglShell, launcher);
-    homescreenHandler->init(port, token.toStdString().c_str());
+	context->setContextProperty("homescreenHandler", homescreenHandler);
+	context->setContextProperty("launcher", launcher);
+	//context->setContextProperty("weather", new Weather(bindingAddress));
+	//context->setContextProperty("bluetooth", new Bluetooth(bindingAddress, context));
+	//context->setContextProperty("speechChromeController", new ChromeController(bindingAddress, &engine));
 
-    QUrl bindingAddress;
-    bindingAddress.setScheme(QStringLiteral("ws"));
-    bindingAddress.setHost(QStringLiteral("localhost"));
-    bindingAddress.setPort(port);
-    bindingAddress.setPath(QStringLiteral("/api"));
+	// we add it here even if we don't use it
+	context->setContextProperty("shell", aglShell);
 
-    QUrlQuery query;
-    query.addQueryItem(QStringLiteral("token"), token);
-    bindingAddress.setQuery(query);
+	/* instead of loading main.qml we load one-by-one each of the QMLs,
+	 * divided now between several surfaces: panels, background. */
+	load_agl_shell_app(native, &engine, agl_shell, screen_name, is_demo_val);
 
-    QQmlApplicationEngine engine;
-    QQmlContext *context = engine.rootContext();
-    context->setContextProperty("bindingAddress", bindingAddress);
-
-    context->setContextProperty("homescreenHandler", homescreenHandler);
-    context->setContextProperty("launcher", launcher);
-    context->setContextProperty("weather", new Weather(bindingAddress));
-    context->setContextProperty("bluetooth", new Bluetooth(bindingAddress, context));
-    context->setContextProperty("speechChromeController", new ChromeController(bindingAddress, &engine));
-    // we add it here even if we don't use it
-    context->setContextProperty("shell", aglShell);
-
-    /* instead of loading main.qml we load one-by-one each of the QMLs,
-     * divided now between several surfaces: panels, background.
-     */
-    load_agl_shell_app(native, &engine, agl_shell, bindingAddress, screen_name, is_demo_val);
-
-    return a.exec();
+	return a.exec();
 }

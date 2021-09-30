@@ -17,35 +17,51 @@ TEMPLATE = app
 TARGET = HomeScreen
 QT = qml quick websockets gui-private
 CONFIG += c++11 link_pkgconfig wayland-scanner
-DESTDIR = $${OUT_PWD}/../package/root/bin
-PKGCONFIG += qtappfw-weather qtappfw-network qtappfw-bt afb-helpers-qt wayland-client json-c
+#DESTDIR = $${OUT_PWD}/../package/root/bin
+DESTDIR = $${OUT_PWD}
+#PKGCONFIG += qtappfw-weather qtappfw-network qtappfw-bt afb-helpers-qt wayland-client json-c
+PKGCONFIG += wayland-client json-c
 
-LIBS += -lhomescreen
+#LIBS += -lhomescreen
 
 CONFIG(release, debug|release) {
     QMAKE_POST_LINK = $(STRIP) --strip-unneeded $(TARGET)
 }
 
+#SOURCES += \
+#    src/main.cpp \
+#    src/statusbarmodel.cpp \
+#    src/statusbarserver.cpp \
+#    src/applicationlauncher.cpp \
+#    src/mastervolume.cpp \
+#    src/homescreenhandler.cpp \
+#    src/shell.cpp \
+#    src/aglsocketwrapper.cpp \
+#    src/chromecontroller.cpp
+
 SOURCES += \
     src/main.cpp \
-    src/statusbarmodel.cpp \
-    src/statusbarserver.cpp \
     src/applicationlauncher.cpp \
-    src/mastervolume.cpp \
     src/homescreenhandler.cpp \
     src/shell.cpp \
     src/aglsocketwrapper.cpp \
-    src/chromecontroller.cpp
+
+#HEADERS  += \
+#    src/statusbarmodel.h \
+#    src/statusbarserver.h \
+#    src/applicationlauncher.h \
+#    src/mastervolume.h \
+#    src/homescreenhandler.h \
+#    src/shell.h \
+#    src/aglsocketwrapper.h \
+#    src/chromecontroller.h \
+#    src/constants.h
 
 HEADERS  += \
-    src/statusbarmodel.h \
-    src/statusbarserver.h \
     src/applicationlauncher.h \
-    src/mastervolume.h \
     src/homescreenhandler.h \
     src/shell.h \
     src/aglsocketwrapper.h \
-    src/chromecontroller.h \
     src/constants.h
 
 OTHER_FILES += \

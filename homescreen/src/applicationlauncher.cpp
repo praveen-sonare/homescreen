@@ -20,8 +20,6 @@
 
 #include "applicationlauncher.h"
 
-#include "hmi-debug.h"
-
 ApplicationLauncher::ApplicationLauncher(QObject *parent)
     : QObject(parent)
     , m_launching(false)

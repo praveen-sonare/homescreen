@@ -18,8 +18,8 @@
 import QtQuick 2.2
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 2.0
-import AGL.Demo.Controls 1.0
-import MasterVolume 1.0
+//import AGL.Demo.Controls 1.0
+//import MasterVolume 1.0
 
 Image {
     anchors.fill: parent
@@ -55,13 +55,11 @@ Image {
     PropertyChanges { target: master_volume; opacity: 1.0 }
     PropertyChanges { target: slider; enabled: true }
     PropertyChanges { target: logo_image; opacity: 0.0 }
-    PropertyChanges { target: speech_chrome; visible: false }
     },
     State { when: !displayVolume;
     PropertyChanges { target: master_volume; opacity: 0.0 }
     PropertyChanges { target: slider; enabled: false }
     PropertyChanges { target: logo_image; opacity: 1.0 }
-    PropertyChanges { target: speech_chrome; visible: speech_chrome.agentPresent }
     }
     ]
 
@@ -69,13 +67,18 @@ Image {
     NumberAnimation { property: "opacity"; duration: 500}
     }
 
-    MasterVolume {
-        id: mv
-        objectName: "mv"
-        onVolumeChanged: slider.value = volume
-        Component.onCompleted: {
-            mv.open(bindingAddress);
-        }
+    //MasterVolume {
+    //    id: mv
+    //    objectName: "mv"
+    //    onVolumeChanged: slider.value = volume
+    //    Component.onCompleted: {
+    //        mv.open(bindingAddress);
+    //    }
+    //}
+
+    Item {
+	id: mv
+	property double volume: 0
     }
 
     Item {
@@ -123,11 +126,11 @@ Image {
         }
     }
 
-    SpeechChrome {
-        id: speech_chrome
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        height: parent.height
-    }
+    //SpeechChrome {
+    //    id: speech_chrome
+    //    anchors.left: parent.left
+    //    anchors.right: parent.right
+    //    anchors.bottom: parent.bottom
+    //    height: parent.height
+    //}
 }
