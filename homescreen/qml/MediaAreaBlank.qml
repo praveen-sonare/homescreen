@@ -19,9 +19,7 @@ import QtQuick 2.2
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 2.0
 import AGL.Demo.Controls 1.0
-/*
 import MasterVolume 1.0
-*/
 
 Image {
     anchors.fill: parent
@@ -68,16 +66,13 @@ Image {
     transitions: Transition {
     NumberAnimation { property: "opacity"; duration: 500}
     }
-/*
+
     MasterVolume {
         id: mv
         objectName: "mv"
         onVolumeChanged: slider.value = volume
-        Component.onCompleted: {
-            mv.open(bindingAddress);
-        }
     }
-*/
+
     Item {
         id: master_volume
         anchors.fill: parent
@@ -108,10 +103,9 @@ Image {
                 to: 100
                 stepSize: 1
                 snapMode: Slider.SnapOnRelease
-/*
                 onValueChanged: mv.volume = value
                 Component.onCompleted: value = mv.volume
-*/
+
                 onPressedChanged: {
                     if (pressed) {volume_timer.stop()}
                     else {volume_timer.restart()}

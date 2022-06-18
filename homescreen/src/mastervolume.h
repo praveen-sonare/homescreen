@@ -16,32 +16,33 @@
 
 #include <QtCore/QObject>
 #include <QQmlEngine>
+#include "vehiclesignals.h"
 
-class MasterVolume
-	: public QObject
+class MasterVolume : public QObject
 {
 	Q_OBJECT
 	Q_PROPERTY (uint32_t volume READ getVolume WRITE setVolume NOTIFY VolumeChanged)
 
 private:
 	qint32 m_volume;
+	VehicleSignals *m_vs;
+	bool m_connected;
+
+	void updateVolume(QString value);
 
 public:
 	MasterVolume(QObject* parent = nullptr);
 	~MasterVolume() = default;
 
-	//Q_INVOKABLE void open(const QUrl& url);
 	Q_INVOKABLE qint32 getVolume() const;
 	Q_INVOKABLE void setVolume(qint32 val);
 
 private slots:
-#if 0
-	void onClientConnected();
-	void onClientDisconnected();
-	void onClientError(QAbstractSocket::SocketError se);
-	void onClientEventReceived(QString name, const QJsonValue& data);
-	void TryOpen();
-#endif
+	void onConnected();
+	void onAuthorized();
+	void onDisconnected();
+	void onGetSuccessResponse(QString path, QString value, QString timestamp);
+	void onSignalNotification(QString path, QString value, QString timestamp);
 
 signals:
 	void VolumeChanged();

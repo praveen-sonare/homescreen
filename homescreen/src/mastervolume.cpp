@@ -18,25 +18,21 @@
 #include <QTimer>
 #include <QtDebug>
 
-#define MASTER_CONTROL "Master Playback"
-
-MasterVolume::MasterVolume(QObject* parent)
-	: QObject(parent)
-	, m_volume{50}
+MasterVolume::MasterVolume(QObject* parent) :
+	QObject(parent),
+	m_volume(50)
 {
-#if 0
-	connect(&m_client, SIGNAL(connected()), this, SLOT(onClientConnected()));
-	connect(&m_client, SIGNAL(disconnected()), this, SLOT(onClientDisconnected()));
-	connect(&m_client, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(onClientError(QAbstractSocket::SocketError)));
-	connect(&m_client, SIGNAL(eventReceived(QString, const QJsonValue&)), this, SLOT(onClientEventReceived(QString, const QJsonValue&)));
-#endif
-}
+	VehicleSignalsConfig vsConfig("homescreen");
+	m_vs = new VehicleSignals(vsConfig);
 
-#if 0
-void MasterVolume::open(const QUrl& url)
-{
+	if (m_vs) {
+		QObject::connect(m_vs, &VehicleSignals::connected, this, &MasterVolume::onConnected);
+		QObject::connect(m_vs, &VehicleSignals::authorized, this, &MasterVolume::onAuthorized);
+		QObject::connect(m_vs, &VehicleSignals::disconnected, this, &MasterVolume::onDisconnected);
+
+		m_vs->connect();
+	}
 }
-#endif
 
 qint32 MasterVolume::getVolume() const
 {
@@ -45,72 +41,70 @@ qint32 MasterVolume::getVolume() const
 
 void MasterVolume::setVolume(qint32 volume)
 {
-	if (m_volume != volume)
-	{
-		m_volume = volume;
-#if 0
-		QJsonObject arg;
-		arg.insert("control", MASTER_CONTROL);
-		double v = (double) volume / 100.0;
-		arg.insert("value", v);
-		m_client.call("audiomixer", "volume", arg);
-#endif
-	}
+	if (m_volume == volume)
+		return;
+
+	m_volume = volume;
+
+	if (!(m_vs && m_connected))
+		return;
+
+	m_vs->set("Vehicle.Cabin.Infotainment.Media.Volume", QString::number(volume));
 }
 
-#if 0
-
-void MasterVolume::onClientConnected()
+void MasterVolume::onConnected()
 {
+	if (!m_vs)
+		return;
 
-	QJsonObject arg;
-	arg.insert("control", MASTER_CONTROL);
-	m_client.call("audiomixer", "volume", arg, [this](bool r, const QJsonValue& v) {
-		if (r && v.isObject()) {
-			int volume = v.toObject()["response"].toObject()["volume"].toDouble() * 100;
-			volume = qBound(0, volume, 100);
-			if (m_volume != volume)
-			{
-				m_volume = volume;
-				emit VolumeChanged();
-			}
-		}
-
-		QJsonObject arg;
-		arg.insert("event", "volume_changed");
-		m_client.call("audiomixer", "subscribe", arg);
-	});
+	m_vs->authorize();
 }
 
-void MasterVolume::onClientDisconnected()
+void MasterVolume::onAuthorized()
 {
-	qDebug() << "MasterVolume::onClientDisconnected!";
-	QTimer::singleShot(1000, this, SLOT(TryOpen()));
+	if (!m_vs)
+		return;
+
+	m_connected = true;
+
+	QObject::connect(m_vs, &VehicleSignals::getSuccessResponse, this, &MasterVolume::onGetSuccessResponse);
+	QObject::connect(m_vs, &VehicleSignals::signalNotification, this, &MasterVolume::onSignalNotification);
+
+	m_vs->subscribe("Vehicle.Cabin.Infotainment.Media.Volume");
+	m_vs->get("Vehicle.Cabin.Infotainment.Media.Volume");
 }
 
-void MasterVolume::onClientError(QAbstractSocket::SocketError se)
+void MasterVolume::onDisconnected()
 {
-	qDebug() << "MasterVolume::onClientError: " << se;
+	QObject::disconnect(m_vs, &VehicleSignals::signalNotification, this, &MasterVolume::onGetSuccessResponse);
+	QObject::disconnect(m_vs, &VehicleSignals::signalNotification, this, &MasterVolume::onSignalNotification);
+
+	m_connected = false;
 }
 
-void MasterVolume::onClientEventReceived(QString name, const QJsonValue& data)
+void MasterVolume::updateVolume(QString value)
 {
-	qDebug() << "MasterVolume::onClientEventReceived[" << name << "]: " << data;
-	if (name == "audiomixer/volume_changed")
-	{
-		QString ctlName = data.toObject()["control"].toString();
-
-		if (ctlName != MASTER_CONTROL)
-			return;
-
-		int volume = data.toObject()["value"].toDouble() * 100;
+	bool ok;
+	qint32 volume = value.toInt(&ok);
+	if (ok) {
 		volume = qBound(0, volume, 100);
-		if (m_volume != volume)
-		{
+		if (m_volume != volume)	{
 			m_volume = volume;
 			emit VolumeChanged();
 		}
 	}
 }
 
-#endif
+void MasterVolume::onGetSuccessResponse(QString path, QString value, QString timestamp)
+{
+	if (path == "Vehicle.Cabin.Infotainment.Media.Volume") {
+		updateVolume(value);
+		emit VolumeChanged();
+	}
+}
+
+void MasterVolume::onSignalNotification(QString path, QString value, QString timestamp)
+{
+	if (path == "Vehicle.Cabin.Infotainment.Media.Volume")
+		updateVolume(value);
+}

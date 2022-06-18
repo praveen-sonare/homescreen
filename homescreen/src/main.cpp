@@ -248,6 +248,7 @@ load_agl_shell_app(QPlatformNativeInterface *native,
 int main(int argc, char *argv[])
 {
     setenv("QT_QPA_PLATFORM", "wayland", 1);
+    setenv("QT_QUICK_CONTROLS_STYLE", "AGL", 1);
     QGuiApplication a(argc, argv);
     const char *screen_name;
     bool is_demo_val = false;
