@@ -45,6 +45,9 @@
 struct shell_data {
 	struct agl_shell *shell;
 	struct agl_shell_desktop *shell_desktop;
+
+	bool wait_for_bound;
+	bool bound_ok;
 };
 
 static void
@@ -72,6 +75,29 @@ agl_shell_desktop_state_app(void *data,
 		homescreenHandler->appTerminated(app_id);
 }
 
+static void
+agl_shell_bound_ok(void *data, struct agl_shell *agl_shell)
+{
+	struct shell_data *shell_data = static_cast<struct shell_data *>(data);
+	shell_data->wait_for_bound = false;
+
+	shell_data->bound_ok = true;
+}
+
+static void
+agl_shell_bound_fail(void *data, struct agl_shell *agl_shell)
+{
+	struct shell_data *shell_data = static_cast<struct shell_data *>(data);
+	shell_data->wait_for_bound = false;
+
+	shell_data->bound_ok = false;
+}
+
+static const struct agl_shell_listener shell_listener = {
+   agl_shell_bound_ok,
+   agl_shell_bound_fail,
+};
+
 static const struct agl_shell_desktop_listener shell_desktop_listener = {
    agl_shell_desktop_application,
    agl_shell_desktop_state_app
@@ -79,7 +105,7 @@ static const struct agl_shell_desktop_listener shell_desktop_listener = {
 
 static void
 global_add(void *data, struct wl_registry *reg, uint32_t name,
-	   const char *interface, uint32_t)
+	   const char *interface, uint32_t ver)
 {
 	struct shell_data *shell_data = static_cast<struct shell_data *>(data);
 
@@ -88,8 +114,8 @@ global_add(void *data, struct wl_registry *reg, uint32_t name,
 
 	if (strcmp(interface, agl_shell_interface.name) == 0) {
 		shell_data->shell = static_cast<struct agl_shell *>(
-			wl_registry_bind(reg, name, &agl_shell_interface, 1)
-		);
+			wl_registry_bind(reg, name, &agl_shell_interface, 2));
+			agl_shell_add_listener(shell_data->shell, &shell_listener, data);
 	}
 
 	if (strcmp(interface, agl_shell_desktop_interface.name) == 0) {
@@ -127,6 +153,13 @@ getWlOutput(QPlatformNativeInterface *native, QScreen *screen)
 	return static_cast<struct ::wl_output*>(output);
 }
 
+static struct wl_display *
+getWlDisplay(QPlatformNativeInterface *native)
+{
+	return static_cast<struct wl_display *>(
+		native->nativeResourceForIntegration("display")
+	);
+}
 
 static void
 register_agl_shell(QPlatformNativeInterface *native, struct shell_data *shell_data)
@@ -134,9 +167,7 @@ register_agl_shell(QPlatformNativeInterface *native, struct shell_data *shell_da
 	struct wl_display *wl;
 	struct wl_registry *registry;
 
-	wl = static_cast<struct wl_display *>(
-			native->nativeResourceForIntegration("display")
-	);
+	wl = getWlDisplay(native);
 	registry = wl_display_get_registry(wl);
 
 	wl_registry_add_listener(registry, &registry_listener, shell_data);
@@ -257,7 +288,8 @@ int main(int argc, char *argv[])
     QGuiApplication a(argc, argv);
     const char *screen_name;
     bool is_demo_val = false;
-    struct shell_data shell_data = { nullptr, nullptr };
+    int ret = 0;
+    struct shell_data shell_data = { nullptr, nullptr, true, false };
 
     QPlatformNativeInterface *native = qApp->platformNativeInterface();
     screen_name = getenv("HOMESCREEN_START_SCREEN");
@@ -282,6 +314,19 @@ int main(int argc, char *argv[])
     if (!shell_data.shell_desktop) {
         fprintf(stderr, "agl_shell_desktop extension is not advertised. "
                 "Are you sure that agl-compositor is running?\n");
+        exit(EXIT_FAILURE);
+    }
+
+    while (ret != -1 && shell_data.wait_for_bound) {
+	    ret = wl_display_dispatch(getWlDisplay(native));
+
+	    if (shell_data.wait_for_bound)
+		    continue;
+    }
+
+    // verify that did bound successfully
+    if (!shell_data.bound_ok) {
+        fprintf(stderr, "agl_shell extension already in use by other shell client.\n");
         exit(EXIT_FAILURE);
     }
 
