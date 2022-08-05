@@ -57,6 +57,7 @@ signals:
 public slots:
     void appStarted(const QString& application_id);
     void appTerminated(const QString& application_id);
+    void appSplit(const QString& application_id, uint32_t orientation);
 
 private:
     ApplicationLauncher *mp_launcher;

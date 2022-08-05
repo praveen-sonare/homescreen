@@ -114,7 +114,7 @@ global_add(void *data, struct wl_registry *reg, uint32_t name,
 
 	if (strcmp(interface, agl_shell_interface.name) == 0) {
 		shell_data->shell = static_cast<struct agl_shell *>(
-			wl_registry_bind(reg, name, &agl_shell_interface, 2));
+			wl_registry_bind(reg, name, &agl_shell_interface, 3));
 			agl_shell_add_listener(shell_data->shell, &shell_listener, data);
 	}
 

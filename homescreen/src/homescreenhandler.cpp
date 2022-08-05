@@ -54,6 +54,7 @@ void HomescreenHandler::init(void)
      */
     connect(applaunch_iface, SIGNAL(started(QString)), this, SLOT(appStarted(QString)));
     connect(applaunch_iface, SIGNAL(terminated(QString)), this, SLOT(appTerminated(QString)));
+    connect(applaunch_iface, SIGNAL(splited(QString, uint32_t)), this, SLOT(appSplit(QString, uint32_t)));
 
 }
 
@@ -108,6 +109,20 @@ void HomescreenHandler::addAppToStack(const QString& application_id)
         if (current_pos != last_pos)
             apps_stack.move(current_pos, last_pos);
     }
+}
+
+void HomescreenHandler::appSplit(const QString& application_id, uint32_t orientation)
+{
+    struct agl_shell *agl_shell = aglShell->shell.get();
+    QPlatformNativeInterface *native = qApp->platformNativeInterface();
+    struct wl_output *output = getWlOutput(native, qApp->screens().first());
+
+    HMI_DEBUG("HomeScreen", "Split application %s", application_id.toStdString().c_str());
+
+    fprintf(stderr, "homescreen: doing a split for app %s with orientation passed %d\n",
+		    application_id.toStdString().c_str(), orientation);
+    agl_shell_set_app_split(agl_shell, application_id.toStdString().c_str(),
+                            orientation, output);
 }
 
 void HomescreenHandler::appStarted(const QString& application_id)
