@@ -1,18 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Copyright (C) 2016, 2017 Mentor Graphics Development (Deutschland) GmbH
  * Copyright (c) 2017, 2018 TOYOTA MOTOR CORPORATION
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright (c) 2022 Konsulko Group
  */
 
 #include <QGuiApplication>
@@ -69,7 +59,7 @@ agl_shell_desktop_state_app(void *data,
 	HomescreenHandler *homescreenHandler = static_cast<HomescreenHandler *>(data);
 
 	if (homescreenHandler && state == AGL_SHELL_DESKTOP_APP_STATE_DESTROYED)
-		homescreenHandler->appTerminated(app_id);
+		homescreenHandler->deactivateApp(app_id);
 }
 
 static const struct agl_shell_desktop_listener shell_desktop_listener = {
@@ -252,68 +242,68 @@ load_agl_shell_app(QPlatformNativeInterface *native,
 
 int main(int argc, char *argv[])
 {
-    setenv("QT_QPA_PLATFORM", "wayland", 1);
-    setenv("QT_QUICK_CONTROLS_STYLE", "AGL", 1);
-    QGuiApplication a(argc, argv);
-    const char *screen_name;
-    bool is_demo_val = false;
-    struct shell_data shell_data = { nullptr, nullptr };
+	setenv("QT_QPA_PLATFORM", "wayland", 1);
+	setenv("QT_QUICK_CONTROLS_STYLE", "AGL", 1);
 
-    QPlatformNativeInterface *native = qApp->platformNativeInterface();
-    screen_name = getenv("HOMESCREEN_START_SCREEN");
+	QGuiApplication app(argc, argv);
+	const char *screen_name;
+	bool is_demo_val = false;
+	struct shell_data shell_data = { nullptr, nullptr };
 
-    const char *is_demo = getenv("HOMESCREEN_DEMO_CI");
-    if (is_demo && strcmp(is_demo, "1") == 0)
-        is_demo_val = true;
+	QPlatformNativeInterface *native = qApp->platformNativeInterface();
+	screen_name = getenv("HOMESCREEN_START_SCREEN");
 
-    QCoreApplication::setOrganizationDomain("LinuxFoundation");
-    QCoreApplication::setOrganizationName("AutomotiveGradeLinux");
-    QCoreApplication::setApplicationName("HomeScreen");
-    QCoreApplication::setApplicationVersion("0.7.0");
-    /* we need to have an app_id */
-    a.setDesktopFileName("homescreen");
+	const char *is_demo = getenv("HOMESCREEN_DEMO_CI");
+	if (is_demo && strcmp(is_demo, "1") == 0)
+		is_demo_val = true;
 
-    register_agl_shell(native, &shell_data);
-    if (!shell_data.shell) {
-        fprintf(stderr, "agl_shell extension is not advertised. "
-                "Are you sure that agl-compositor is running?\n");
-        exit(EXIT_FAILURE);
-    }
-    if (!shell_data.shell_desktop) {
-        fprintf(stderr, "agl_shell_desktop extension is not advertised. "
-                "Are you sure that agl-compositor is running?\n");
-        exit(EXIT_FAILURE);
-    }
+	QCoreApplication::setOrganizationDomain("LinuxFoundation");
+	QCoreApplication::setOrganizationName("AutomotiveGradeLinux");
+	QCoreApplication::setApplicationName("HomeScreen");
+	QCoreApplication::setApplicationVersion("0.7.0");
 
-    std::shared_ptr<struct agl_shell> agl_shell{shell_data.shell, agl_shell_destroy};
-    Shell *aglShell = new Shell(agl_shell, &a);
+	// we need to have an app_id
+	app.setDesktopFileName("homescreen");
 
-    // import C++ class to QML
-    qmlRegisterType<StatusBarModel>("HomeScreen", 1, 0, "StatusBarModel");
-    qmlRegisterType<MasterVolume>("MasterVolume", 1, 0, "MasterVolume");
+	register_agl_shell(native, &shell_data);
+	if (!shell_data.shell) {
+		fprintf(stderr, "agl_shell extension is not advertised. "
+			"Are you sure that agl-compositor is running?\n");
+		exit(EXIT_FAILURE);
+	}
+	if (!shell_data.shell_desktop) {
+		fprintf(stderr, "agl_shell_desktop extension is not advertised. "
+			"Are you sure that agl-compositor is running?\n");
+		exit(EXIT_FAILURE);
+	}
 
-    ApplicationLauncher *launcher = new ApplicationLauncher();
-    launcher->setCurrent(QStringLiteral("launcher"));
-    HomescreenHandler* homescreenHandler = new HomescreenHandler(aglShell, launcher);
-    homescreenHandler->init();
+	std::shared_ptr<struct agl_shell> agl_shell{shell_data.shell, agl_shell_destroy};
+	Shell *aglShell = new Shell(agl_shell, &app);
 
-    agl_shell_desktop_add_listener(shell_data.shell_desktop, &shell_desktop_listener, homescreenHandler);
+	// Import C++ class to QML
+	qmlRegisterType<StatusBarModel>("HomeScreen", 1, 0, "StatusBarModel");
+	qmlRegisterType<MasterVolume>("MasterVolume", 1, 0, "MasterVolume");
 
-    QQmlApplicationEngine engine;
-    QQmlContext *context = engine.rootContext();
+	ApplicationLauncher *launcher = new ApplicationLauncher();
+	launcher->setCurrent(QStringLiteral("launcher"));
+	HomescreenHandler* homescreenHandler = new HomescreenHandler(aglShell, launcher);
 
-    context->setContextProperty("homescreenHandler", homescreenHandler);
-    context->setContextProperty("launcher", launcher);
-    context->setContextProperty("weather", new Weather());
-    context->setContextProperty("bluetooth", new Bluetooth(false, context));
+	agl_shell_desktop_add_listener(shell_data.shell_desktop, &shell_desktop_listener, homescreenHandler);
 
-    // we add it here even if we don't use it
-    context->setContextProperty("shell", aglShell);
+	QQmlApplicationEngine engine;
+	QQmlContext *context = engine.rootContext();
 
-    /* instead of loading main.qml we load one-by-one each of the QMLs,
-     * divided now between several surfaces: panels, background.
-     */
-    load_agl_shell_app(native, &engine, shell_data.shell, screen_name, is_demo_val);
+	context->setContextProperty("homescreenHandler", homescreenHandler);
+	context->setContextProperty("launcher", launcher);
+	context->setContextProperty("weather", new Weather());
+	context->setContextProperty("bluetooth", new Bluetooth(false, context));
 
-    return a.exec();
+	// We add it here even if we don't use it
+	context->setContextProperty("shell", aglShell);
+
+	// Instead of loading main.qml we load one-by-one each of the QMLs,
+	// divided now between several surfaces: panels, background.
+	load_agl_shell_app(native, &engine, shell_data.shell, screen_name, is_demo_val);
+
+	return app.exec();
 }

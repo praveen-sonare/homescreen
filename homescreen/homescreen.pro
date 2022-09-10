@@ -15,11 +15,10 @@
 
 TEMPLATE = app
 TARGET = homescreen
-QT = qml quick gui-private dbus
+QT = qml quick gui-private
 CONFIG += c++11 link_pkgconfig wayland-scanner
-PKGCONFIG += wayland-client qtappfw-weather qtappfw-network qtappfw-bt qtappfw-vehicle-signals
-
-DBUS_INTERFACES = $$[QT_SYSROOT]/usr/share/dbus-1/interfaces/org.automotivelinux.AppLaunch.xml
+PKGCONFIG += wayland-client
+PKGCONFIG += qtappfw-weather qtappfw-network qtappfw-bt qtappfw-vehicle-signals qtappfw-applauncher
 
 SOURCES += \
     src/main.cpp \

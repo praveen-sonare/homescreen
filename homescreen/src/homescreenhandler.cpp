@@ -1,60 +1,43 @@
+// SPDX-License-Identifier: Apache-2.0
 /*
  * Copyright (c) 2017, 2018, 2019 TOYOTA MOTOR CORPORATION
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright (c) 2022 Konsulko Group
  */
 
 #include <QGuiApplication>
 #include <QFileInfo>
-#include "homescreenhandler.h"
 #include <functional>
+
+#include "homescreenhandler.h"
 #include "hmi-debug.h"
 
 #include <qpa/qplatformnativeinterface.h>
 
-#define APPLAUNCH_DBUS_IFACE     "org.automotivelinux.AppLaunch"
-#define APPLAUNCH_DBUS_OBJECT    "/org/automotivelinux/AppLaunch"
-/* LAUNCHER_APP_ID shouldn't be started by applaunchd as it is started as a
- * user session by systemd */
+// LAUNCHER_APP_ID shouldn't be started by applaunchd as it is started as
+// a user session by systemd
 #define LAUNCHER_APP_ID          "launcher"
 
-void* HomescreenHandler::myThis = 0;
-
 HomescreenHandler::HomescreenHandler(Shell *_aglShell, ApplicationLauncher *launcher, QObject *parent) :
-    QObject(parent),
-    aglShell(_aglShell)
+	QObject(parent),
+	aglShell(_aglShell)
 {
-    mp_launcher = launcher;
-    applaunch_iface = new org::automotivelinux::AppLaunch(APPLAUNCH_DBUS_IFACE, APPLAUNCH_DBUS_OBJECT,
-                                                          QDBusConnection::sessionBus(), this);
+	mp_launcher = launcher;
+	mp_applauncher_client = new AppLauncherClient();
+
+	//
+	// The "started" event is received any time a start request is made to applaunchd,
+	// and the application either starts successfully or is already running. This
+	// effectively acts as a "switch to app X" action.
+	//
+	connect(mp_applauncher_client,
+		&AppLauncherClient::appStatusEvent,
+		this,
+		&HomescreenHandler::processAppStatusEvent);
 }
 
 HomescreenHandler::~HomescreenHandler()
 {
-}
-
-void HomescreenHandler::init(void)
-{
-    myThis = this;
-
-    /*
-     * The "started" signal is received any time a start request is made to applaunchd,
-     * and the application either starts successfully or is already running. This
-     * effectively acts as a "switch to app X" action.
-     */
-    connect(applaunch_iface, SIGNAL(started(QString)), this, SLOT(appStarted(QString)));
-    connect(applaunch_iface, SIGNAL(terminated(QString)), this, SLOT(appTerminated(QString)));
-
+	delete mp_applauncher_client;
 }
 
 static struct wl_output *
@@ -64,29 +47,24 @@ getWlOutput(QPlatformNativeInterface *native, QScreen *screen)
 	return static_cast<struct ::wl_output*>(output);
 }
 
-void HomescreenHandler::tapShortcut(QString application_id)
+void HomescreenHandler::tapShortcut(QString app_id)
 {
-    QDBusPendingReply<> reply;
-    HMI_DEBUG("HomeScreen","tapShortcut %s", application_id.toStdString().c_str());
+	HMI_DEBUG("HomeScreen","tapShortcut %s", app_id.toStdString().c_str());
 
-    if (application_id == LAUNCHER_APP_ID)
-        goto activate_app;
+	if (app_id == LAUNCHER_APP_ID)
+		goto activate_app;
 
-    reply = applaunch_iface->start(application_id);
-    reply.waitForFinished();
-
-    if (reply.isError()) {
-        HMI_ERROR("HomeScreen","Unable to start application '%s': %s",
-            application_id.toStdString().c_str(),
-            reply.error().message().toStdString().c_str());
-        return;
-    }
+	if (!mp_applauncher_client->startApplication(app_id)) {
+		HMI_ERROR("HomeScreen","Unable to start application '%s'",
+			  app_id.toStdString().c_str());
+		return;
+	}
 
 activate_app:
-    if (mp_launcher) {
-        mp_launcher->setCurrent(application_id);
-    }
-    appStarted(application_id);
+	if (mp_launcher) {
+		mp_launcher->setCurrent(app_id);
+	}
+	activateApp(app_id);
 }
 
 /*
@@ -94,39 +72,48 @@ activate_app:
  * they were activated. That way, when an app is closed, we can
  * switch back to the previously active one.
  */
-void HomescreenHandler::addAppToStack(const QString& application_id)
+void HomescreenHandler::addAppToStack(const QString& app_id)
 {
-    if (application_id == "homescreen")
-        return;
+	if (app_id == "homescreen")
+		return;
 
-    if (!apps_stack.contains(application_id)) {
-        apps_stack << application_id;
-    } else {
-        int current_pos = apps_stack.indexOf(application_id);
-        int last_pos = apps_stack.size() - 1;
+	if (!apps_stack.contains(app_id)) {
+		apps_stack << app_id;
+	} else {
+		int current_pos = apps_stack.indexOf(app_id);
+		int last_pos = apps_stack.size() - 1;
 
-        if (current_pos != last_pos)
-            apps_stack.move(current_pos, last_pos);
-    }
+		if (current_pos != last_pos)
+			apps_stack.move(current_pos, last_pos);
+	}
 }
 
-void HomescreenHandler::appStarted(const QString& application_id)
+void HomescreenHandler::activateApp(const QString& app_id)
 {
     struct agl_shell *agl_shell = aglShell->shell.get();
     QPlatformNativeInterface *native = qApp->platformNativeInterface();
     struct wl_output *output = getWlOutput(native, qApp->screens().first());
 
-    HMI_DEBUG("HomeScreen", "Activating application %s", application_id.toStdString().c_str());
-    agl_shell_activate_app(agl_shell, application_id.toStdString().c_str(), output);
-    addAppToStack(application_id);
+    HMI_DEBUG("HomeScreen", "Activating application %s", app_id.toStdString().c_str());
+    agl_shell_activate_app(agl_shell, app_id.toStdString().c_str(), output);
+    addAppToStack(app_id);
 }
 
-void HomescreenHandler::appTerminated(const QString& application_id)
+void HomescreenHandler::deactivateApp(const QString& app_id)
 {
-    HMI_DEBUG("HomeScreen", "Application %s terminated, activating last app", application_id.toStdString().c_str());
-    if (apps_stack.contains(application_id)) {
-        apps_stack.removeOne(application_id);
-        if (!apps_stack.isEmpty())
-            appStarted(apps_stack.last());
-    }
+	if (apps_stack.contains(app_id)) {
+		apps_stack.removeOne(app_id);
+		if (!apps_stack.isEmpty())
+			activateApp(apps_stack.last());
+	}
+}
+
+void HomescreenHandler::processAppStatusEvent(const QString &app_id, const QString &status)
+{
+	if (status == "started") {
+		activateApp(app_id);
+	} else if (status == "terminated") {
+		HMI_DEBUG("HomeScreen", "Application %s terminated, activating last app", app_id.toStdString().c_str());
+		deactivateApp(app_id);
+	}
 }
