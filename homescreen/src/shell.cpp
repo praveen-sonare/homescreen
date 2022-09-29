@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019 Collabora Ltd.
+ * Copyright © 2019, 2022 Collabora Ltd.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -26,7 +26,8 @@
 #include <QGuiApplication>
 #include <QDebug>
 #include "shell.h"
-#include <qpa/qplatformnativeinterface.h>
+// defined by meson build file
+#include QT_QPA_HEADER
 #include <stdio.h>
 
 static struct wl_output *

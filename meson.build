@@ -1,4 +1,5 @@
-# Copyright (c) 2017 TOYOTA MOTOR CORPORATION
+#
+# Copyright ©, 2022 Collabora, Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,10 +12,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-TEMPLATE = subdirs
+project (
+  'homescreen',
+  ['c', 'cpp'],
+  version : '1.0.0',
+  license : 'Apache-2.0',
+  meson_version : '>= 0.60.0',
+  default_options :
+    [
+      'warning_level=1',
+      'buildtype=debugoptimized',
+      'c_std=c17',
+      'cpp_std=c++17'
+    ],
+)
 
-load(configure)
-
-SUBDIRS = \
-    homescreen
+qt5 = import('qt5')
+subdir('homescreen')

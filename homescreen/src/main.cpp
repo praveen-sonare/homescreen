@@ -25,10 +25,11 @@
 #include "homescreenhandler.h"
 #include "hmi-debug.h"
 
-#include <qpa/qplatformnativeinterface.h>
+// meson will define these
+#include QT_QPA_HEADER
 #include <wayland-client.h>
 
-#include "wayland-agl-shell-client-protocol.h"
+#include "agl-shell-client-protocol.h"
 #include "shell.h"
 
 #ifndef MIN

@@ -11,7 +11,8 @@
 #include "homescreenhandler.h"
 #include "hmi-debug.h"
 
-#include <qpa/qplatformnativeinterface.h>
+// defined by meson build file
+#include QT_QPA_HEADER
 
 // LAUNCHER_APP_ID shouldn't be started by applaunchd as it is started as
 // a user session by systemd

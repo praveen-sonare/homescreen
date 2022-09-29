@@ -32,7 +32,7 @@
 #include <QScreen>
 #include <QWindow>
 #include <memory>
-#include "wayland-agl-shell-client-protocol.h"
+#include "agl-shell-client-protocol.h"
 
 /*
  * Basic type to wrap the agl_shell wayland object into a QObject, so that it

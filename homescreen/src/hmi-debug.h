@@ -49,7 +49,6 @@ static void _HMI_LOG(enum LOG_LEVEL level, const char* file, const char* func, c
     struct timespec tp;
     uint32_t time;
     va_list args;
-    int ret;
     const int log_level = (getenv("USE_HMI_DEBUG") == NULL) ? LOG_LEVEL_ERROR : atoi(getenv("USE_HMI_DEBUG"));
 
     if(log_level < level) {
