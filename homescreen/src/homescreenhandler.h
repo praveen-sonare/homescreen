@@ -21,7 +21,13 @@ class HomescreenHandler : public QObject
 {
 	Q_OBJECT
 public:
-	explicit HomescreenHandler(Shell *aglShell, ApplicationLauncher *launcher = 0, QObject *parent = 0);
+	static HomescreenHandler *Instance(Shell *aglShell = 0, ApplicationLauncher *launcher = 0)
+	{
+		static HomescreenHandler *inst = new HomescreenHandler(aglShell, launcher);
+		return inst;
+	}
+
+	explicit HomescreenHandler(Shell *aglShell = 0, ApplicationLauncher *launcher = 0, QObject *parent = 0);
 	~HomescreenHandler();
 
 	Q_INVOKABLE void tapShortcut(QString application_id);

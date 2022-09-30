@@ -15,6 +15,7 @@
 #include <QtQml/qqml.h>
 #include <QQuickWindow>
 #include <QTimer>
+#include <QThread>
 
 #include <weather.h>
 #include <bluetooth.h>
@@ -31,10 +32,40 @@
 
 #include "agl-shell-client-protocol.h"
 #include "shell.h"
+#include "Worker.h"
+#include "AglShellManager.h"
 
 #ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
+
+void
+WorkerThread::run()
+{
+	// instantiante the grpc server
+	std::string server_address(kDefaultGrpcServiceAddress);
+	GrpcServiceImpl service;
+
+	grpc::EnableDefaultHealthCheckService(true);
+	grpc::reflection::InitProtoReflectionServerBuilderPlugin();
+
+	grpc::ServerBuilder builder;
+	builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
+	builder.RegisterService(&service);
+
+	std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
+	fprintf(stderr, "Server listening on %s\n", server_address.c_str());
+
+	server->Wait();
+}
+
+static void
+run_grpc_server(void)
+{
+    WorkerThread *workerThread = new WorkerThread();
+    workerThread->start();
+}
+
 
 struct shell_data {
 	struct agl_shell *shell;
@@ -342,7 +373,7 @@ int main(int argc, char *argv[])
 	ApplicationLauncher *launcher = new ApplicationLauncher();
 	launcher->setCurrent(QStringLiteral("launcher"));
 
-	HomescreenHandler* homescreenHandler = new HomescreenHandler(aglShell, launcher);
+	HomescreenHandler* homescreenHandler = HomescreenHandler::Instance(aglShell, launcher);
 	shell_data.homescreenHandler = homescreenHandler;
 
 	QQmlApplicationEngine engine;
@@ -359,6 +390,8 @@ int main(int argc, char *argv[])
 	// Instead of loading main.qml we load one-by-one each of the QMLs,
 	// divided now between several surfaces: panels, background.
 	load_agl_shell_app(native, &engine, shell_data.shell, screen_name, is_demo_val);
+
+	run_grpc_server();
 
 	return app.exec();
 }

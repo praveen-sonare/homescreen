@@ -1,5 +1,9 @@
 cpp = meson.get_compiler('cpp')
-qt5_dep = dependency('qt5', modules: ['Qml', 'Quick', 'Gui'])
+qt5_dep = dependency('qt5', modules: ['Qml', 'Quick', 'Gui', 'Core'])
+grpcpp_reflection_dep = cpp.find_library('grpc++_reflection')
+protoc = find_program('protoc')
+grpc_cpp = find_program('grpc_cpp_plugin')
+
 dep_wayland_client = dependency('wayland-client', version: '>= 1.20.0')
 dep_qtappfw = [
     dependency('qtappfw-weather'),
@@ -7,6 +11,29 @@ dep_qtappfw = [
     dependency('qtappfw-bt'),
     dependency('qtappfw-vehicle-signals'),
     dependency('qtappfw-applauncher')
+]
+
+protoc_gen = generator(protoc, \
+                       output : ['@BASENAME@.pb.cc', '@BASENAME@.pb.h'],
+                       arguments : ['--proto_path=@CURRENT_SOURCE_DIR@/src',
+                         '--cpp_out=@BUILD_DIR@',
+                         '@INPUT@'])
+
+generated_protoc_sources = protoc_gen.process('src/agl_shell.proto')
+
+grpc_gen = generator(protoc, \
+                     output : ['@BASENAME@.grpc.pb.cc', '@BASENAME@.grpc.pb.h'],
+                     arguments : ['--proto_path=@CURRENT_SOURCE_DIR@/src',
+                       '--grpc_out=@BUILD_DIR@',
+                       '--plugin=protoc-gen-grpc=' + grpc_cpp.path(),
+                       '@INPUT@'])
+generated_grpc_sources = grpc_gen.process('src/agl_shell.proto')
+
+grpc_deps = [
+    dependency('protobuf'),
+    dependency('grpc'),
+    dependency('grpc++'),
+    grpcpp_reflection_dep,
 ]
 
 qt_defines = []
@@ -26,6 +53,7 @@ dir_agl_compositor_base = agl_compositor_dep.get_pkgconfig_variable('pkgdatadir'
 
 homescreen_dep = [
     qt5_dep,
+    grpc_deps,
     dep_wayland_client,
     dep_qtappfw,
 ]
@@ -83,6 +111,8 @@ homescreen_src_headers = [
   'src/statusbarmodel.h',
   'src/statusbarserver.h',
   'src/homescreenhandler.h',
+  'src/AglShellManager.h',
+  'src/Worker.h',
   'src/shell.h'
 ]
 
@@ -91,12 +121,15 @@ moc_files = qt5.compile_moc(headers: homescreen_src_headers,
 
 homescreen_src = [
   'src/shell.cpp',
+  'src/AglShellManager.cpp',
   'src/statusbarserver.cpp',
   'src/statusbarmodel.cpp',
   'src/applicationlauncher.cpp',
   'src/mastervolume.cpp',
   'src/homescreenhandler.cpp',
   'src/main.cpp',
+  generated_protoc_sources,
+  generated_grpc_sources,
   agl_shell_client_protocol_h,
   agl_shell_protocol_c
 ]
