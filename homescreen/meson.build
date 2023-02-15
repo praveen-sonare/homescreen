@@ -21,7 +21,7 @@ endif
 
 dep_scanner = dependency('wayland-scanner')
 prog_scanner = find_program(dep_scanner.get_pkgconfig_variable('wayland_scanner'))
-agl_compositor_dep = dependency('agl-compositor-0.0.20-protocols')
+agl_compositor_dep = dependency('agl-compositor-0.0.21-protocols')
 dir_agl_compositor_base = agl_compositor_dep.get_pkgconfig_variable('pkgdatadir')
 
 homescreen_dep = [
