@@ -28,7 +28,6 @@ HomescreenHandler::HomescreenHandler(Shell *_aglShell, ApplicationLauncher *laun
 	mp_launcher = launcher;
 	mp_applauncher_client = new AppLauncherClient();
 	QPlatformNativeInterface *native = qApp->platformNativeInterface();
-	m_output = getWlOutput(native, qApp->screens().first());
 
 	//
 	// The "started" event is received any time a start request is made to applaunchd,
@@ -93,13 +92,16 @@ void HomescreenHandler::addAppToStack(const QString& app_id)
 void HomescreenHandler::activateApp(const QString& app_id)
 {
 	struct agl_shell *agl_shell = aglShell->shell.get();
+	QPlatformNativeInterface *native = qApp->platformNativeInterface();
+	struct wl_output *mm_output = getWlOutput(native, qApp->screens().first());
 
 	if (mp_launcher) {
 		mp_launcher->setCurrent(app_id);
 	}
 
 	HMI_DEBUG("HomeScreen", "Activating application %s", app_id.toStdString().c_str());
-	agl_shell_activate_app(agl_shell, app_id.toStdString().c_str(), m_output);
+
+	agl_shell_activate_app(agl_shell, app_id.toStdString().c_str(), mm_output);
 }
 
 void HomescreenHandler::deactivateApp(const QString& app_id)
