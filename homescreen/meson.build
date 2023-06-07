@@ -19,10 +19,9 @@ if cpp.has_header(qpa_header, dependencies : qt5_dep)
   message('Found QtGui QPA header in ' + qpa_header_path)
 endif
 
-dep_scanner = dependency('wayland-scanner')
-prog_scanner = find_program(dep_scanner.get_pkgconfig_variable('wayland_scanner'))
+prog_scanner = find_program('wayland-scanner')
 agl_compositor_dep = dependency('agl-compositor-0.0.21-protocols')
-dir_agl_compositor_base = agl_compositor_dep.get_pkgconfig_variable('pkgdatadir')
+dir_agl_compositor_base = agl_compositor_dep.get_variable(pkgconfig: 'pkgdatadir')
 
 homescreen_dep = [
     qt5_dep,
@@ -60,7 +59,7 @@ foreach proto: protocols
                         output_file = '@0@-server-protocol.h'.format(base_file)
                 else
                         output_file = '@0@-protocol.c'.format(base_file)
-                        if dep_scanner.version().version_compare('< 1.14.91')
+                        if prog_scanner.version().version_compare('< 1.14.91')
                                 output_type = 'code'
                         endif
                 endif
