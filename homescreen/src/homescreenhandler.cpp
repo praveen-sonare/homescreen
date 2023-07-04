@@ -40,6 +40,7 @@ HomescreenHandler::HomescreenHandler(Shell *_aglShell, ApplicationLauncher *laun
 		&AppLauncherClient::appStatusEvent,
 		this,
 		&HomescreenHandler::processAppStatusEvent);
+	activateApp(QString("dashboard"));
 }
 
 HomescreenHandler::~HomescreenHandler()
@@ -77,7 +78,7 @@ void HomescreenHandler::tapShortcut(QString app_id)
  */
 void HomescreenHandler::addAppToStack(const QString& app_id)
 {
-	if (app_id == "homescreen")
+	if (app_id == "homescreen" || app_id == "dashboard")
 		return;
 
 	if (!apps_stack.contains(app_id)) {
